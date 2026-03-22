@@ -32,7 +32,7 @@ data = {
 }
 
 response = requests.post(url, files=file, data=data)
-with open("../output/spitzer_data.tbl", "w") as f:
+with open("../output/spitzer_clumps.tbl", "w") as f:
     f.write(response.text)
 
 print("done!\n")
