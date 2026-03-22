@@ -1,0 +1,132 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36" version="29.6.4">
+  <diagram name="Página-1" id="10zjgsYWkyDFTV9hVrfl">
+    <mxGraphModel dx="1426" dy="751" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="pNykSANskDUTgPnpxVP7-15" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="pNykSANskDUTgPnpxVP7-14">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="200" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-24" connectable="0" parent="pNykSANskDUTgPnpxVP7-15" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="For each region" vertex="1">
+          <mxGeometry relative="1" x="-0.1" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-20" edge="1" parent="1" source="pNykSANskDUTgPnpxVP7-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="pNykSANskDUTgPnpxVP7-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-21" connectable="0" parent="pNykSANskDUTgPnpxVP7-20" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="No" vertex="1">
+          <mxGeometry relative="1" x="-0.2286" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-29" edge="1" parent="1" source="pNykSANskDUTgPnpxVP7-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="pNykSANskDUTgPnpxVP7-27">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-31" connectable="0" parent="pNykSANskDUTgPnpxVP7-29" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Yes" vertex="1">
+          <mxGeometry relative="1" x="-0.2283" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-3" parent="1" style="rhombus;whiteSpace=wrap;html=1;verticalAlign=middle;spacingBottom=-6;" value="Is there already a&lt;div&gt;Spitzer image for&lt;/div&gt;&lt;div&gt;this region?&lt;/div&gt;" vertex="1">
+          <mxGeometry height="112.5" width="110" x="270" y="323.75" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-30" edge="1" parent="1" source="pNykSANskDUTgPnpxVP7-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="pNykSANskDUTgPnpxVP7-27">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Add one Spitzer img (table)" vertex="1">
+          <mxGeometry height="60" width="120" x="440" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-16" edge="1" parent="1" source="pNykSANskDUTgPnpxVP7-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="pNykSANskDUTgPnpxVP7-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-17" connectable="0" parent="pNykSANskDUTgPnpxVP7-16" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="No" vertex="1">
+          <mxGeometry relative="1" x="-0.3667" y="2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-33" edge="1" parent="1" source="pNykSANskDUTgPnpxVP7-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="pNykSANskDUTgPnpxVP7-32">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-34" connectable="0" parent="pNykSANskDUTgPnpxVP7-33" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Yes" vertex="1">
+          <mxGeometry relative="1" x="-0.22" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-14" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="All regions read?" vertex="1">
+          <mxGeometry height="80" width="80" x="60" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-28" edge="1" parent="1" source="pNykSANskDUTgPnpxVP7-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="160" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-27" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Link region to image" vertex="1">
+          <mxGeometry height="60" width="120" x="265" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-54" edge="1" parent="1" source="pNykSANskDUTgPnpxVP7-32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="pNykSANskDUTgPnpxVP7-53" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-32" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="SPITZER IMG&lt;div&gt;.tbl&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="40" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-49" edge="1" parent="1" source="pNykSANskDUTgPnpxVP7-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="pNykSANskDUTgPnpxVP7-41">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-38" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Download image" vertex="1">
+          <mxGeometry height="60" width="120" x="260" y="595" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-50" edge="1" parent="1" source="pNykSANskDUTgPnpxVP7-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="pNykSANskDUTgPnpxVP7-47" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-41" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Perform cutouts&lt;div&gt;for each region inside&lt;/div&gt;&lt;div&gt;the image&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="440" y="595" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-51" edge="1" parent="1" source="pNykSANskDUTgPnpxVP7-47" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="pNykSANskDUTgPnpxVP7-32" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-47" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Remove image" vertex="1">
+          <mxGeometry height="60" width="120" x="440" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-55" edge="1" parent="1" source="pNykSANskDUTgPnpxVP7-53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="pNykSANskDUTgPnpxVP7-38" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-56" connectable="0" parent="pNykSANskDUTgPnpxVP7-55" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="No" vertex="1">
+          <mxGeometry relative="1" x="-0.1111" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-58" edge="1" parent="1" source="pNykSANskDUTgPnpxVP7-53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-62" connectable="0" parent="pNykSANskDUTgPnpxVP7-58" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Yes" vertex="1">
+          <mxGeometry relative="1" x="-0.2364" y="2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-53" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="All images read" vertex="1">
+          <mxGeometry height="80" width="80" x="60" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-61" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="100" as="sourcePoint" />
+            <mxPoint x="100" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-63" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Finish" vertex="1">
+          <mxGeometry height="60" width="120" x="40" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-64" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Alma regions .tbl" vertex="1">
+          <mxGeometry height="60" width="120" x="40" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="pNykSANskDUTgPnpxVP7-65" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Start" vertex="1">
+          <mxGeometry height="60" width="120" x="40" y="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
