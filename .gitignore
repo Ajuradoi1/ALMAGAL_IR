@@ -184,4 +184,5 @@ src/__marimo__/
 src/.ipynb_checkpoints/
 
 output/
-alma_input/
+alma_input/*.txt
+alma_input/*.tab
