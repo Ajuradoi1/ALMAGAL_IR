@@ -52,38 +52,57 @@ def source_match(region, alma_sources, spitzer_sources):
         alma_sources["CLUMP"] == str(region["INTERNAL_ID"])
     ].reset_index(drop=True)
 
-    for alma_index in range(len(alma_sources_cut)):
-        source_coords = SkyCoord(
-            alma_sources_cut["RA"][alma_index],
-            alma_sources_cut["DEC"][alma_index],
+    match_table_local = match_2_cat(
+        cat_1=alma_sources_cut,
+        cat_2=spitzer_sources_cut,
+        match_table_local=match_table_local,
+    )
+    return match_table_local
+
+
+def match_2_cat(cat_1, cat_2, match_table_local):
+
+    if isinstance(cat_1, pd.DataFrame):
+        cat_1_id = "CLUMP"
+        cat_1_ra = "RA"
+        cat_1_dec = "DEC"
+    else:
+        cat_1_id = "designation"
+        cat_1_ra = "ra"
+        cat_1_dec = "dec"
+
+    for cat_1_index in range(len(cat_1)):
+        cat_1_coords = SkyCoord(
+            cat_1[cat_1_ra][cat_1_index],
+            cat_1[cat_1_dec][cat_1_index],
             unit=(u.deg, u.deg),
             frame="icrs",
         )
         radius = (
             0.6 * u.arcsec + 0.25 * u.arcsec
         )  # Spitzer resolution + ALMA resolution (assuming 0.25" for ALMA)
-        spitzer_coords = SkyCoord(
-            spitzer_sources_cut["ra"],
-            spitzer_sources_cut["dec"],
+        cat_2_coords = SkyCoord(
+            cat_2["ra"],
+            cat_2["dec"],
             unit=(u.deg, u.deg),
             frame="icrs",
         )
-        seps = source_coords.separation(spitzer_coords)
+        seps = cat_1_coords.separation(cat_2_coords)
 
-        for spitzer_index in range(len(spitzer_sources_cut)):
+        for cat_2_index in range(len(cat_2)):
             # Only consider the spitzer source with the minimum separation to the alma source
 
-            if seps[spitzer_index] < radius and seps[spitzer_index] == np.min(seps):
+            if seps[cat_2_index] < radius and seps[cat_2_index] == np.min(seps):
                 match_table_local.add_row(
                     [
-                        alma_sources_cut["CLUMP"][alma_index],
-                        (alma_index + 1),
-                        spitzer_sources_cut["designation"][spitzer_index],
-                        source_coords.ra.deg * u.deg,
-                        source_coords.dec.deg * u.deg,
-                        spitzer_sources_cut["ra"][spitzer_index] * u.deg,
-                        spitzer_sources_cut["dec"][spitzer_index] * u.deg,
-                        (seps[spitzer_index] * 3600) * u.arcsec,
+                        cat_1[cat_1_id][cat_1_index],
+                        (cat_1_index + 1),
+                        cat_2["designation"][cat_2_index],
+                        cat_1_coords.ra.deg * u.deg,
+                        cat_1_coords.dec.deg * u.deg,
+                        cat_2["ra"][cat_2_index] * u.deg,
+                        cat_2["dec"][cat_2_index] * u.deg,
+                        (seps[cat_2_index] * 3600) * u.arcsec,
                     ]
                 )
     return match_table_local
@@ -92,14 +111,10 @@ def source_match(region, alma_sources, spitzer_sources):
 def match_table_fun(alma_regions_file: str, alma_sources_file: str, catalog: str):
 
     alma_regions = Table.read("../alma_input/" + alma_regions_file, format="ascii.ipac")
-    # print(alma_regions[:2])
-    # print("\n\n\n")
 
     spitzer_sources = Table.read(
         "../output/tables/spitzer_sources_" + catalog + ".tbl", format="ascii.ipac"
     )
-    # print(spitzer_sources[:2])
-    # print("\n\n\n")
 
     alma_sources = pd.read_csv(
         "../alma_input/" + alma_sources_file,
@@ -107,8 +122,6 @@ def match_table_fun(alma_regions_file: str, alma_sources_file: str, catalog: str
         skiprows=[2],
         delimiter="\s+",
     )
-    # print(alma_sources[6001:6004])
-    # print("\n\n\n")
 
     match_table = QTable(
         names=[
@@ -174,6 +187,7 @@ def match_table_fun(alma_regions_file: str, alma_sources_file: str, catalog: str
     return match_table
 
 
+os.makedirs("../output", exist_ok=True)
 os.makedirs("../output/figures", exist_ok=True)
 
 
@@ -214,7 +228,7 @@ def plot_source_matches_all(match_table, catalog):
     )
     ax.add_patch(circle_total)
     ax.set_ylim(-1, 1)
-    ax.set_xlim(-1, 1)
+    ax.set_xlim(1, -1)
     ax.set_ylabel("Declination (arcsec)")
     ax.set_xlabel("Right Ascension (arcsec)")
     ax.set_aspect("equal", adjustable="box")
@@ -262,11 +276,11 @@ def plot_match_heatmap(match_table, catalog: str):
     kde = gaussian_kde(xy)
 
     # grid
-    xi, yi = np.mgrid[min(x) : max(x) : 200j, min(y) : max(y) : 200j]
+    xi, yi = np.mgrid[min(x) : max(x) : 200j, max(y) : min(y) : 200j]
     zi = kde(np.vstack([xi.flatten(), yi.flatten()]))
 
     im = ax.imshow(
-        zi.reshape(xi.shape), origin="lower", extent=[-1, 1, -1, 1], cmap="viridis"
+        zi.reshape(xi.shape), origin="lower", extent=[1, -1, -1, 1], cmap="viridis"
     )
 
     ring(radius, "black", 2)
