@@ -95,8 +95,8 @@ def match_2_cat(cat_1, cat_2, match_table_local):
             if seps[cat_2_index] < radius and seps[cat_2_index] == np.min(seps):
                 match_table_local.add_row(
                     [
-                        cat_1[cat_1_id][cat_1_index],
-                        (cat_1_index + 1),
+                        cat_1[cat_1_id][0],
+                        (cat_1_index) + 1,
                         cat_2["designation"][cat_2_index],
                         cat_1_coords.ra.deg * u.deg,
                         cat_1_coords.dec.deg * u.deg,

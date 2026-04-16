@@ -17,7 +17,6 @@ from spitzer_data import spitzer_data
 
 from regions_ds9_script import regions_ds9
 from clumps_analysis import (
-    match_2_cat,
     match_table_fun,
     plot_separation_histogram,
     plot_source_matches_all,
