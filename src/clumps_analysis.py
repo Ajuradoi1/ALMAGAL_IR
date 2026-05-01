@@ -19,7 +19,7 @@ import matplotlib
 matplotlib.use("Agg")
 
 
-def source_match(region, alma_sources, spitzer_sources):
+def alma_source_match(region, alma_sources, spitzer_sources):
 
     match_table_local = QTable(
         names=[
@@ -48,67 +48,45 @@ def source_match(region, alma_sources, spitzer_sources):
     spitzer_sources_cut = spitzer_sources[
         spitzer_sources["internal_id_01"] == str(region["INTERNAL_ID"])
     ]
-    alma_sources_cut = alma_sources[
-        alma_sources["CLUMP"] == str(region["INTERNAL_ID"])
-    ].reset_index(drop=True)
+    alma_sources_cut = alma_sources[alma_sources["CLUMP"] == str(region["INTERNAL_ID"])]
 
-    match_table_local = match_2_cat(
-        cat_1=alma_sources_cut,
-        cat_2=spitzer_sources_cut,
-        match_table_local=match_table_local,
+    alma_coords = SkyCoord(
+        alma_sources_cut["RA"],
+        alma_sources_cut["DEC"],
+        unit=(u.deg, u.deg),
+        frame="icrs",
     )
-    return match_table_local
+    spitzer_coords = SkyCoord(
+        spitzer_sources_cut["ra"],
+        spitzer_sources_cut["dec"],
+        unit=(u.deg, u.deg),
+        frame="icrs",
+    )
+    radius = (
+        0.6 * u.arcsec + 0.25 * u.arcsec
+    )  # Spitzer resolution + ALMA resolution (assuming 0.25" for ALMA)
 
-
-def match_2_cat(cat_1, cat_2, match_table_local):
-
-    if isinstance(cat_1, pd.DataFrame):
-        cat_1_id = "CLUMP"
-        cat_1_ra = "RA"
-        cat_1_dec = "DEC"
-    else:
-        cat_1_id = "designation"
-        cat_1_ra = "ra"
-        cat_1_dec = "dec"
-
-    for cat_1_index in range(len(cat_1)):
-        cat_1_coords = SkyCoord(
-            cat_1[cat_1_ra][cat_1_index],
-            cat_1[cat_1_dec][cat_1_index],
-            unit=(u.deg, u.deg),
-            frame="icrs",
-        )
-        radius = (
-            0.6 * u.arcsec + 0.25 * u.arcsec
-        )  # Spitzer resolution + ALMA resolution (assuming 0.25" for ALMA)
-        cat_2_coords = SkyCoord(
-            cat_2["ra"],
-            cat_2["dec"],
-            unit=(u.deg, u.deg),
-            frame="icrs",
-        )
-        seps = cat_1_coords.separation(cat_2_coords)
-
-        for cat_2_index in range(len(cat_2)):
-            # Only consider the spitzer source with the minimum separation to the alma source
-
-            if seps[cat_2_index] < radius and seps[cat_2_index] == np.min(seps):
+    for alma_source, alma_coord in enumerate(alma_coords, start=0):
+        seps = alma_coords[alma_source].separation(spitzer_coords)
+        for spitzer_source, spitzer_coord in enumerate(spitzer_coords, start=0):
+            if seps[spitzer_source] < radius and seps[spitzer_source] == np.min(seps):
                 match_table_local.add_row(
                     [
-                        cat_1[cat_1_id][0],
-                        (cat_1_index) + 1,
-                        cat_2["designation"][cat_2_index],
-                        cat_1_coords.ra.deg * u.deg,
-                        cat_1_coords.dec.deg * u.deg,
-                        cat_2["ra"][cat_2_index] * u.deg,
-                        cat_2["dec"][cat_2_index] * u.deg,
-                        (seps[cat_2_index] * 3600) * u.arcsec,
+                        alma_sources_cut["CLUMP"][0],
+                        alma_sources_cut["ID"][alma_source],
+                        spitzer_sources_cut["designation"][spitzer_source],
+                        alma_coord.ra.deg * u.deg,
+                        alma_coord.dec.deg * u.deg,
+                        spitzer_coord.ra.deg * u.deg,
+                        spitzer_coord.dec.deg * u.deg,
+                        (seps[spitzer_source] * 3600) * u.arcsec,
                     ]
                 )
+
     return match_table_local
 
 
-def match_table_fun(alma_regions_file: str, alma_sources_file: str, catalog: str):
+def alma_match_table_fun(alma_regions_file: str, alma_sources_file: str, catalog: str):
 
     alma_regions = Table.read("../alma_input/" + alma_regions_file, format="ascii.ipac")
 
@@ -116,11 +94,13 @@ def match_table_fun(alma_regions_file: str, alma_sources_file: str, catalog: str
         "../output/tables/spitzer_sources_" + catalog + ".tbl", format="ascii.ipac"
     )
 
-    alma_sources = pd.read_csv(
-        "../alma_input/" + alma_sources_file,
-        comment="\\",
-        skiprows=[2],
-        delimiter="\s+",
+    alma_sources = Table.from_pandas(
+        pd.read_csv(
+            "../alma_input/" + alma_sources_file,
+            comment="\\",
+            skiprows=[2],
+            delimiter="\s+",
+        )
     )
 
     match_table = QTable(
@@ -147,18 +127,14 @@ def match_table_fun(alma_regions_file: str, alma_sources_file: str, catalog: str
         ],
     )
 
-    test_regions = len(
-        alma_regions
-    )  # Set this to a smaller number for testing, e.g., 10 or 20
-    # test_regions = 100
-    regions_subset = alma_regions[:test_regions]
+    regions_subset = alma_regions
 
     if os.name == "nt":  # For Windows
         print(
             "Running on Windows. Parallel work is not supported. Processing regions sequentially..."
         )
         for region in tqdm(regions_subset, total=len(regions_subset)):
-            result = source_match(region, alma_sources, spitzer_sources)
+            result = alma_source_match(region, alma_sources, spitzer_sources)
             match_table = vstack([match_table, result])
     else:
         with Pool(cpu_count()) as pool:
@@ -169,7 +145,7 @@ def match_table_fun(alma_regions_file: str, alma_sources_file: str, catalog: str
             ]
 
             results = tqdm(
-                pool.starmap(source_match, args),
+                pool.starmap(alma_source_match, args),
                 total=len(regions_subset),
             )
         for result in results:

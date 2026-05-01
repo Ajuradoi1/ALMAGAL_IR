@@ -12,18 +12,24 @@
 import sys
 import os
 from astropy.table import Table
+from astropy.coordinates import SkyCoord
+from astropy import units as u
 
+import numpy as np
+import pandas as pd
 from spitzer_data import spitzer_data
 
 from regions_ds9_script import regions_ds9
 from clumps_analysis import (
-    match_table_fun,
+    alma_match_table_fun,
     plot_separation_histogram,
     plot_source_matches_all,
     plot_match_heatmap,
 )
 
-from YSO_Gutermuth_09 import YSO_Phase_I
+from twomass_to_spitzer import twomass_to_spitzer
+
+from YSO_Gutermuth_09 import YSO_Phase_I, YSO_Phase_II
 
 if len(sys.argv) == 1:
     sys.argv.append("glimpse_s07")
@@ -41,6 +47,22 @@ cat = sys.argv[1]
 alma_file = sys.argv[2]
 alma_sources_file = sys.argv[3]
 alma_regions = Table.read("../alma_input/" + alma_file, format="ascii.ipac")[:2]
+
+# alma_sources = Table.read("../alma_input/" + alma_sources_file, format="ascii.ipac")
+alma_sources = Table.from_pandas(
+    pd.read_csv(
+        "../alma_input/" + alma_sources_file,
+        comment="\\",
+        skiprows=[2],
+        delimiter="\s+",
+    )
+)
+
+spitzer_sources = Table.read(
+    "../output/tables/spitzer_sources_" + cat + ".tbl",
+    format="ipac",
+)
+
 
 # alma_regions = alma_regions[0]
 
@@ -105,7 +127,7 @@ else:
 print("\nfinding matches...\n")
 
 if not os.path.isfile("../output/tables/match_table_" + cat + ".tbl"):
-    match_table_fun(
+    alma_match_table_fun(
         alma_regions_file=alma_file, alma_sources_file=alma_sources_file, catalog=cat
     )
     match_table = Table.read(
@@ -119,6 +141,16 @@ else:
     print(
         f"\nmatch table found, skipping matching... {len(match_table)} matches found\n"
     )
+
+spitzer_sources["has_alma"] = [
+    i in (match_table["spitzer_source"]) for i in spitzer_sources["designation"]
+]
+
+match_keys_alma = set(zip(match_table["region_id"], match_table["alma_source"]))
+
+alma_sources["HAS_SPITZER"] = [
+    (r, s) in match_keys_alma for r, s in zip(alma_sources["CLUMP"], alma_sources["ID"])
+]
 
 
 if (
@@ -136,10 +168,19 @@ if (
     print("\ndone!")
 
 if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
-    class_I, class_II, no_class = YSO_Phase_I(cat)
+    class_I, class_II, no_class = YSO_Phase_I(spitzer_sources, cat)
 
-    if not os.path.isfile("../output/tables/spitzer_2MASS_fp_psc.tbl"):
-        print("\n2MASS data missing, downloading...")
-        spitzer_data(alma_regions_file=alma_file, catalog="fp_psc", type="2MASS")
+    if not os.path.isfile("../output/tables/" + cat + "_2mass.tbl"):
+        if not os.path.isfile("../output/tables/spitzer_2MASS_fp_psc.tbl"):
+            print("\n2MASS data missing, downloading...")
+            spitzer_data(alma_regions_file=alma_file, catalog="fp_psc", type="2MASS")
 
-    # spitzer_sources = spitzer_sources[spitzer_sources["designation"].isin(match_table["spitzer_source"])]
+        print("\nadding 2mass data to spitzer...")
+
+        spitzer_sources = twomass_to_spitzer(spitzer_sources, cat)
+    else:
+        spitzer_sources = Table.read("../output/tables/" + cat + "_2mass.tbl")
+
+    print("\nproceeding with phase II...")
+
+    class_I_II, class_II_II, no_class_II = YSO_Phase_II(spitzer_sources, cat)

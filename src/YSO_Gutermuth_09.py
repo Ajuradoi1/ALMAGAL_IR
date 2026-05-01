@@ -10,11 +10,7 @@ os.makedirs("../output", exist_ok=True)
 os.makedirs("../output/figures", exist_ok=True)
 
 
-def YSO_Phase_I(cat):
-
-    spitzer_sources = Table.read(
-        "../output/tables/spitzer_sources_" + cat + ".tbl", format="ipac"
-    )
+def YSO_Phase_I(spitzer_sources, cat):
 
     # < 0.2 mag error in all four bands
 
@@ -170,5 +166,18 @@ def YSO_Phase_I(cat):
     return phase_I_class_I, phase_I_class_II, phase_I_no_class
 
 
-def YSO_Phase_II(cat):
+def YSO_Phase_II(spitzer_sources, cat):
+
+    # j_msigcom|h_msigcom|k_msigcom|
+
+    phase_II = spitzer_sources["has_twomass"]
+
+    phase_II = phase_II[
+        ((phase_II["h_miscom"] < 0.1) & (phase_II["k_msigcom"] < 0.1))
+        & (not (phase_II["j_msigcom"] > 0.1))
+        & (not (phase_II["d5_8"] > 0.2) | (not (phase_II["d8_0"] > 0.2)))
+    ]
+
+    # Preamble done
+
     return 0
