@@ -170,10 +170,12 @@ def YSO_Phase_II(spitzer_sources, cat):
 
     # j_msigcom|h_msigcom|k_msigcom|
 
-    phase_II = spitzer_sources["has_twomass"]
+    phase_II = spitzer_sources[spitzer_sources["has_twomass"]]
+
+    print(phase_II)
 
     phase_II = phase_II[
-        ((phase_II["h_miscom"] < 0.1) & (phase_II["k_msigcom"] < 0.1))
+        ((phase_II["h_msigcom"] < 0.1) & (phase_II["k_msigcom"] < 0.1))
         & (not (phase_II["j_msigcom"] > 0.1))
         & (not (phase_II["d5_8"] > 0.2) | (not (phase_II["d8_0"] > 0.2)))
     ]

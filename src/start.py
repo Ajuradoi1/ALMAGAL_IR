@@ -179,7 +179,9 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
 
         spitzer_sources = twomass_to_spitzer(spitzer_sources, cat)
     else:
-        spitzer_sources = Table.read("../output/tables/" + cat + "_2mass.tbl")
+        spitzer_sources = Table.read(
+            "../output/tables/" + cat + "_2mass.tbl", format="ascii.ipac"
+        )
 
     print("\nproceeding with phase II...")
 
