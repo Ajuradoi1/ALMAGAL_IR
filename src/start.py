@@ -54,13 +54,8 @@ alma_sources = Table.from_pandas(
         "../alma_input/" + alma_sources_file,
         comment="\\",
         skiprows=[2],
-        delimiter="\s+",
+        delimiter=r"\s+",
     )
-)
-
-spitzer_sources = Table.read(
-    "../output/tables/spitzer_sources_" + cat + ".tbl",
-    format="ipac",
 )
 
 
@@ -142,6 +137,11 @@ else:
         f"\nmatch table found, skipping matching... {len(match_table)} matches found\n"
     )
 
+spitzer_sources = Table.read(
+    "../output/tables/spitzer_sources_" + cat + ".tbl",
+    format="ipac",
+)
+
 spitzer_sources["has_alma"] = [
     i in (match_table["spitzer_source"]) for i in spitzer_sources["designation"]
 ]
@@ -185,4 +185,5 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
 
     print("\nproceeding with phase II...")
 
-    class_I_II, class_II_II, no_class_II = YSO_Phase_II(spitzer_sources, cat)
+    # class_I_II, class_II_II, no_class_II = YSO_Phase_II(spitzer_sources, cat)
+    print("\n YSO classification incomplete, phase II not implemented yet...")

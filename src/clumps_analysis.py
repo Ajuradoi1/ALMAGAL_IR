@@ -235,6 +235,7 @@ def plot_match_heatmap(match_table, catalog: str):
     radius = (
         0.6 * u.arcsec + 0.25 * u.arcsec
     )  # Spitzer resolution + ALMA resolution (assuming 0.25" for ALMA)
+    fig, ax = plt.subplots()
 
     for match in match_table:
         x.append(
@@ -246,13 +247,25 @@ def plot_match_heatmap(match_table, catalog: str):
         )
         y.append(((match["spitzer_dec"] - match["alma_dec"]) * 3600))
 
-    fig, ax = plt.subplots()
-
+        """ax.scatter(
+            x[-1],
+            y[-1],
+            color="blue",
+            alpha=0.5,
+        )"""
+    """
     xy = np.vstack([x, y])
+    xy = np.vstack(
+        [
+            np.array(x) + np.random.normal(0, 1e-6, len(x)),
+            np.array(y) + np.random.normal(0, 1e-6, len(y)),
+        ]
+    )
     kde = gaussian_kde(xy)
 
     # grid
-    xi, yi = np.mgrid[min(x) : max(x) : 200j, max(y) : min(y) : 200j]
+
+    xi, yi = np.mgrid[max(x) : min(x) : 500j, min(y) : max(y) : 500j]
     zi = kde(np.vstack([xi.flatten(), yi.flatten()]))
 
     im = ax.imshow(
@@ -265,12 +278,53 @@ def plot_match_heatmap(match_table, catalog: str):
 
     cbar = plt.colorbar(im, ax=ax)
     cbar.set_label(label="Density")
+    # plt.colorbar(im, ax=ax)
 
-    ax.set_aspect("equal")
+    ax.set_aspect("equal", adjustable="box")
+    ax.set_ylabel("Declination (arcsec)")
+    ax.set_xlabel("Right Ascension (arcsec)")
+    ax.set_title("Distribution of Spitzer sources around ALMA sources")
+
+    plt.tight_layout()
+    """
+
+    # x, y = your data
+
+    xy = np.vstack([x, y])
+    kde = gaussian_kde(xy)
+
+    # fixed grid: x in [-1,1], y in [-1,1]
+    xi, yi = np.mgrid[-1:1:200j, -1:1:200j]
+
+    zi = kde(np.vstack([xi.ravel(), yi.ravel()])).reshape(xi.shape)
+
+    fig, ax = plt.subplots()
+
+    im = ax.imshow(
+        zi.T,  # transpose is essential
+        origin="lower",
+        extent=[-1, 1, -1, 1],
+        cmap="viridis",
+        aspect="equal",
+    )
+
+    # overlay points
+    ax.scatter(x, y, color="white", alpha=0.3, s=5)
+
+    # flip x so it goes 1 -> -1
+    ax.set_xlim(1, -1)
+    ax.set_ylim(-1, 1)
+
+    ring(radius, "black", 2)
+    ring(0.25, "red", 1)
+    ax.scatter(0, 0, color="red", linewidth=1, s=300, marker="+")
+
+    ax.set_aspect("equal", adjustable="box")
     ax.set_ylabel("Declination (arcsec)")
     ax.set_xlabel("Right Ascension (arcsec)")
     ax.set_title("Distribution of Spitzer sources around ALMA sources")
 
     plt.tight_layout()
 
+    plt.colorbar(im, ax=ax)
     plt.savefig("../output/figures/match_" + catalog + "_heatmap.svg", format="svg")
