@@ -14,6 +14,7 @@ import os
 from astropy.table import Table
 from astropy.coordinates import SkyCoord
 from astropy import units as u
+from matplotlib import pyplot as plt
 
 import numpy as np
 import pandas as pd
@@ -46,7 +47,7 @@ elif len(sys.argv) == 2:
 cat = sys.argv[1]
 alma_file = sys.argv[2]
 alma_sources_file = sys.argv[3]
-alma_regions = Table.read("../alma_input/" + alma_file, format="ascii.ipac")[:2]
+alma_regions = Table.read("../alma_input/" + alma_file, format="ascii.ipac")
 
 # alma_sources = Table.read("../alma_input/" + alma_sources_file, format="ascii.ipac")
 alma_sources = Table.from_pandas(
@@ -168,6 +169,71 @@ if (
     print("\ndone!")
 
 if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
+    # First we need to extract the extinction of each reagion using almaprops
+
+    SURFD_to_Ak = (1 / (2.016)) * (6.022 * 1e23) * (1 / (1.6 * 1e22))
+
+    # Build fast lookups
+    deconv_lookup = dict(zip(alma_regions["INTERNAL_ID"], alma_regions["DECONV_SURFD"]))
+
+    nodec_lookup = dict(zip(alma_regions["INTERNAL_ID"], alma_regions["NODEC_SURFD"]))
+
+    # Fill arrays safely
+    mask_DECONV = np.array(
+        [
+            deconv_lookup.get(region, np.nan)
+            for region in spitzer_sources["internal_id_01"]
+        ]
+    )
+
+    mask_NODEC = np.array(
+        [
+            nodec_lookup.get(region, np.nan)
+            for region in spitzer_sources["internal_id_01"]
+        ]
+    )
+
+    # Add columns
+    spitzer_sources["Ak_DECONV"] = mask_DECONV * SURFD_to_Ak / 10
+    spitzer_sources["Ak_NODEC"] = mask_NODEC * SURFD_to_Ak / 10
+
+    mean_ak_nodec = np.mean(
+        spitzer_sources["Ak_NODEC"][
+            spitzer_sources["Ak_NODEC"] != -999 * SURFD_to_Ak / 10
+        ]
+    )
+    mean_ak_deconv = np.mean(
+        spitzer_sources["Ak_DECONV"][
+            spitzer_sources["Ak_DECONV"] != -999 * SURFD_to_Ak / 10
+        ]
+    )
+
+    for source in spitzer_sources:
+        if source["Ak_NODEC"] == -999 * SURFD_to_Ak / 10:
+            source["Ak_NODEC"] = mean_ak_nodec
+        if source["Ak_DECONV"] == -999 * SURFD_to_Ak / 10:
+            source["Ak_DECONV"] = mean_ak_deconv
+
+    fig = plt.figure(figsize=(8, 6))
+
+    plt.hist(
+        spitzer_sources["Ak_NODEC"], bins=50, alpha=0.5, label="NODEC", density=True
+    )
+    plt.ylabel("Density")
+    plt.xlabel("Ak_NODEC")
+    plt.savefig("../output/figures/Ak_histogram_" + cat + "_NODEC.svg", format="svg")
+
+    fig = plt.figure(figsize=(8, 6))
+
+    plt.hist(
+        spitzer_sources["Ak_DECONV"], bins=50, alpha=0.5, label="DECONV", density=True
+    )
+    plt.ylabel("Density")
+    plt.xlabel("Ak_DECONV")
+    plt.savefig("../output/figures/Ak_histogram_" + cat + "_DECONV.svg", format="svg")
+
+    spitzer_sources.write("../output/tables/TEST", format="ascii.ipac", overwrite=True)
+
     class_I, class_II, no_class = YSO_Phase_I(spitzer_sources, cat)
 
     if not os.path.isfile("../output/tables/" + cat + "_2mass.tbl"):
@@ -186,4 +252,4 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
     print("\nproceeding with phase II...")
 
     # class_I_II, class_II_II, no_class_II = YSO_Phase_II(spitzer_sources, cat)
-    print("\n YSO classification incomplete, phase II not implemented yet...")
+    print("\nYSO classification incomplete, phase II not implemented yet...")

@@ -13,6 +13,15 @@ os.makedirs("../output/figures", exist_ok=True)
 def YSO_Phase_I(spitzer_sources, cat):
     # < 0.2 mag error in all four bands
 
+    A3_6 = 0.63
+    A4_5 = 0.57
+    A5_8 = 0.49
+    A8_0 = 0.55
+
+    # A3_6, A4_5, A5_8, A8_0 = [0, 0, 0, 0]
+
+    # test purposes
+
     good = (  # mask is used to identify null values
         ~spitzer_sources["d3_6m"].mask
         & ~spitzer_sources["d4_5m"].mask
@@ -30,7 +39,7 @@ def YSO_Phase_I(spitzer_sources, cat):
     phase_I = spitzer_sources[good & ~bad]
 
     print(
-        f"\n[Phase_I] - {len(phase_I)} sources with good photometry in all four IRAC bands"
+        f"\n\n[Phase I] - {len(phase_I)} sources with good photometry in all four IRAC bands"
     )
 
     """phase_I.write(
@@ -41,57 +50,81 @@ def YSO_Phase_I(spitzer_sources, cat):
 
     # Remove PAH galaxies
 
-    _, ax = plt.subplots(2, 1, figsize=(6, 6))
+    # _, ax = plt.subplots(2, 1, figsize=(6, 6))
 
     pah_galaxies = phase_I.copy()
 
     phase_I = phase_I[
         ~(
             (
-                (phase_I["color45_58"] < (1.05 / 1.2) * (phase_I["color58_80"] - 1.0))
-                & (phase_I["color45_58"] < 1.05)
-                & (phase_I["color58_80"] > 1.0)
-                & (phase_I["mag4_5"] > 11.5)
+                (
+                    phase_I["color45_58"] + (A4_5 - A5_8) * phase_I["Ak_NODEC"]
+                    < (1.05 / 1.2)
+                    * (
+                        phase_I["color58_80"]
+                        + (A5_8 - A8_0) * phase_I["Ak_NODEC"]
+                        - 1.0
+                    )
+                )
+                & (phase_I["color45_58"] + (A4_5 - A5_8) * phase_I["Ak_NODEC"] < 1.05)
+                & (phase_I["color58_80"] + (A5_8 - A8_0) * phase_I["Ak_NODEC"] > 1.0)
+                & (phase_I["mag4_5"] + A4_5 * phase_I["Ak_NODEC"] > 11.5)
             )
             | (
-                (phase_I["color36_58"] < 1.05)
-                & (phase_I["mag4_5"] > 11.5)
-                & (phase_I["color36_58"] < (1.5 / 2) * (phase_I["color45_80"] - 1.0))
-                & (phase_I["color45_80"] > 1.0)
+                (phase_I["color36_58"] + (A3_6 - A5_8) * phase_I["Ak_NODEC"] < 1.05)
+                & (phase_I["mag4_5"] + A4_5 * phase_I["Ak_NODEC"] > 11.5)
+                & (
+                    phase_I["color36_58"] + (A3_6 - A5_8) * phase_I["Ak_NODEC"]
+                    < (1.5 / 2)
+                    * (
+                        phase_I["color45_80"]
+                        + (A4_5 - A8_0) * phase_I["Ak_NODEC"]
+                        - 1.0
+                    )
+                )
+                & (phase_I["color45_80"] + (A4_5 - A8_0) * phase_I["Ak_NODEC"] > 1.0)
             )
         )
     ]
 
     pah_galaxies = setdiff(pah_galaxies, phase_I, keys="designation")
 
-    print(f"\n[Phase_I] - {len(pah_galaxies)} PAH galaxies removed")
+    print(f"\n[Phase I] - {len(pah_galaxies)} PAH galaxies removed")
 
     _, ax = plt.subplots(2, 1, figsize=(4, 6))
 
     # Data points
 
     ax[0].scatter(
-        pah_galaxies["color58_80"],
-        pah_galaxies["color45_58"],
+        pah_galaxies["color58_80"] + (A5_8 - A8_0) * pah_galaxies["Ak_NODEC"],
+        pah_galaxies["color45_58"] + (A4_5 - A5_8) * pah_galaxies["Ak_NODEC"],
         s=1,
         color="black",
         alpha=1,
     )
 
     ax[0].scatter(
-        phase_I["color58_80"], phase_I["color45_58"], s=1, color="grey", alpha=0.5
+        phase_I["color58_80"] + (A5_8 - A8_0) * phase_I["Ak_NODEC"],
+        phase_I["color45_58"] + (A4_5 - A5_8) * phase_I["Ak_NODEC"],
+        s=1,
+        color="grey",
+        alpha=0.5,
     )
 
     ax[1].scatter(
-        pah_galaxies["color45_80"],
-        pah_galaxies["color36_58"],
+        pah_galaxies["color45_80"] + (A4_5 - A8_0) * pah_galaxies["Ak_NODEC"],
+        pah_galaxies["color36_58"] + (A3_6 - A5_8) * pah_galaxies["Ak_NODEC"],
         s=1,
         color="black",
         alpha=1,
     )
 
     ax[1].scatter(
-        phase_I["color45_80"], phase_I["color36_58"], s=1, color="grey", alpha=0.5
+        phase_I["color45_80"] + (A4_5 - A8_0) * phase_I["Ak_NODEC"],
+        phase_I["color36_58"] + (A3_6 - A5_8) * phase_I["Ak_NODEC"],
+        s=1,
+        color="grey",
+        alpha=0.5,
     )
 
     # Setting up lines to separate PAH galaxies from YSOs
@@ -146,43 +179,70 @@ def YSO_Phase_I(spitzer_sources, cat):
 
     # Remove AGN sources
 
-    A = 1.95
-    A = 0
-
     agn_sources = phase_I.copy()
 
     phase_I = phase_I[
         ~(
             (
-                (phase_I["color45_80"] > 0.5)
-                & (phase_I["mag4_5"] + A > 13.5 + (phase_I["color45_80"] - 2.3) / 0.4)
-                & (phase_I["mag4_5"] + A > 13.5)
+                (phase_I["color45_80"] + (A4_5 - A8_0) * phase_I["Ak_NODEC"] > 0.5)
+                & (
+                    phase_I["mag4_5"] + (A4_5) * phase_I["Ak_NODEC"]
+                    > 13.5
+                    + (
+                        phase_I["color45_80"]
+                        + (A4_5 - A8_0) * phase_I["Ak_NODEC"]
+                        - 2.3
+                    )
+                    / 0.4
+                )
+                & (phase_I["mag4_5"] + (A4_5) * phase_I["Ak_NODEC"] > 13.5)
             )
             & (
-                (phase_I["mag4_5"] + A > 14 + (phase_I["color45_80"] - 0.5))
-                | (phase_I["mag4_5"] + A > 14.5 - (phase_I["color45_80"] - 1.2) / 0.3)
-                | (phase_I["mag4_5"] + A > 14.5)
+                (
+                    phase_I["mag4_5"] + A4_5 * phase_I["Ak_NODEC"]
+                    > 14
+                    + (
+                        phase_I["color45_80"]
+                        + (A4_5 - A8_0) * phase_I["Ak_NODEC"]
+                        - 0.5
+                    )
+                )
+                | (
+                    phase_I["mag4_5"] + A4_5 * phase_I["Ak_NODEC"]
+                    > 14.5
+                    - (
+                        phase_I["color45_80"]
+                        + (A4_5 - A8_0) * phase_I["Ak_NODEC"]
+                        - 1.2
+                    )
+                    / 0.3
+                )
+                | (phase_I["mag4_5"] + A4_5 * phase_I["Ak_NODEC"] > 14.5)
             )
         )
     ]
 
     agn_sources = setdiff(agn_sources, phase_I, keys="designation")
 
-    print(f"\n[Phase_I] - {len(agn_sources)} AGN sources removed")
+    print(f"\n[Phase I] - {len(agn_sources)} AGN sources removed")
 
     # Plotting AGN sources
 
     _, ax = plt.subplots(figsize=(4, 6), layout="tight")
 
     ax.scatter(
-        phase_I["color45_80"], phase_I["mag4_5"] + A, color="grey", alpha=0.5, s=0.5
+        phase_I["color45_80"] + (A4_5 - A8_0) * phase_I["Ak_NODEC"],
+        phase_I["mag4_5"] + A4_5 * phase_I["Ak_NODEC"],
+        color="grey",
+        alpha=0.5,
+        s=0.5,
     )
 
     ax.scatter(
-        agn_sources["color45_80"],
-        agn_sources["mag4_5"] + A,
+        agn_sources["color45_80"] + (A4_5 - A8_0) * agn_sources["Ak_NODEC"],
+        agn_sources["mag4_5"] + A4_5 * agn_sources["Ak_NODEC"],
         color="black",
-        s=10,
+        s=1,
         alpha=1,
     )
 
@@ -230,109 +290,295 @@ def YSO_Phase_I(spitzer_sources, cat):
     ax.set_xlim([-2, 6])
     ax.set_ylim([4, 18])
     ax.yaxis.set_inverted(True)
-
+    plt.tight_layout()
     plt.savefig("../output/figures/YSO_phase_I_AGN_" + cat + ".svg", format="svg")
 
     # Remove shock emission dominated sources
 
+    sed = phase_I.copy()
+
     phase_I = phase_I[
         (
             ~(
-                (
-                    phase_I["color36_45"]
-                    > (12.0 / 0.55) * (phase_I["color45_80"] - 0.3) + 0.8
+                (phase_I["color45_58"] + (A4_5 - A5_8) * phase_I["Ak_NODEC"] <= 0.85)
+                & (phase_I["color36_45"] + (A3_6 - A4_5) * phase_I["Ak_NODEC"] > 1.05)
+                & (
+                    phase_I["color36_45"] + (A3_6 - A4_5) * phase_I["Ak_NODEC"]
+                    > (1.2 / 0.55)
+                    * (
+                        phase_I["color45_58"]
+                        + (A4_5 - A5_8) * phase_I["Ak_NODEC"]
+                        - 0.3
+                    )
+                    + 0.8
                 )
-                & (phase_I["color45_58"] <= 0.85)
-                & (phase_I["color36_45"] > 1.05)
             )
         )
     ]
+
+    sed = setdiff(sed, phase_I, keys="designation")
+    print(f"\n[Phase I] - {len(sed)} Shock Emission Dominated sources removed")
 
     # Remove PAH contaminated sources
 
     sigma_1 = phase_I["d4_5m"] + phase_I["d5_8m"]
     sigma_2 = phase_I["d3_6m"] + phase_I["d4_5m"]
 
+    pah_contam = phase_I.copy()
+
     phase_I = phase_I[
         (
             ~(
                 (
-                    phase_I["color36_45"] - sigma_2
-                    <= 1.4 * (phase_I["color45_58"] + sigma_1 - 0.7)
+                    phase_I["color36_45"]
+                    + (A3_6 - A4_5) * phase_I["Ak_NODEC"]
+                    - sigma_2
+                    <= 1.4
+                    * (
+                        (phase_I["color45_58"] + (A4_5 - A5_8) * phase_I["Ak_NODEC"])
+                        + sigma_1
+                        - 0.7
+                    )
                 )
-                & (phase_I["color36_45"] - sigma_2 <= 1.65)
+                & (
+                    phase_I["color36_45"]
+                    + (A3_6 - A4_5) * phase_I["Ak_NODEC"]
+                    - sigma_2
+                    <= 1.65
+                )
             )
         )
     ]
 
+    pah_contam = setdiff(pah_contam, phase_I, keys="designation")
+    print(f"\n[Phase I] - {len(pah_contam)} PAH-contaminated apertures removed")
+
     # Class I
 
-    phase_I_class_I = phase_I[
-        (phase_I["color45_58"] > 0.7) & (phase_I["color36_45"] > 0.7)
+    class_I = phase_I.copy()
+
+    phase_I = phase_I[
+        ~(
+            (phase_I["color45_58"] + (A4_5 - A5_8) * phase_I["Ak_NODEC"] > 0.7)
+            & (phase_I["color36_45"] + (A3_6 - A4_5) * phase_I["Ak_NODEC"] > 0.7)
+        )
     ]
-    ids_I = np.array(phase_I_class_I["designation"])
+
+    class_I = setdiff(class_I, phase_I, keys="designation")
+    print(f"\n[Phase I] - {len(class_I)} Class I sources")
+
+    # Plotting
+
+    _, ax = plt.subplots(2, 1, figsize=(4, 6), constrained_layout=True)
+
+    ax[0].scatter(
+        phase_I["color45_58"] + (A4_5 - A5_8) * phase_I["Ak_NODEC"],
+        phase_I["color36_45"] + (A3_6 - A4_5) * phase_I["Ak_NODEC"],
+        color="grey",
+        alpha=0.5,
+        s=0.5,
+    )
+
+    ax[0].scatter(
+        class_I["color45_58"] + (A4_5 - A5_8) * class_I["Ak_NODEC"],
+        class_I["color36_45"] + (A3_6 - A4_5) * class_I["Ak_NODEC"],
+        color="grey",
+        alpha=0.5,
+        s=0.5,
+    )
+
+    ax[0].scatter(
+        sed["color45_58"] + (A4_5 - A5_8) * sed["Ak_NODEC"],
+        sed["color36_45"] + (A3_6 - A4_5) * sed["Ak_NODEC"],
+        color="black",
+        s=1,
+        alpha=1,
+    )
+
+    ax[0].scatter(
+        pah_contam["color45_58"] + (A4_5 - A5_8) * pah_contam["Ak_NODEC"],
+        pah_contam["color36_45"] + (A3_6 - A4_5) * pah_contam["Ak_NODEC"],
+        color="black",
+        s=1,
+        alpha=1,
+    )
+
+    x = np.linspace(0.42, 0.85, 100)
+
+    # sed line
+
+    ax[0].plot([-1, 0.42], [1.05, 1.05], color="black", linestyle="-")
+    ax[0].plot(x, (1.2 / 0.55) * (x - 0.3) + 0.8, color="black", linestyle="-")
+    ax[0].plot([0.85, 0.85], [2, 3.5], color="black", linestyle="-")
+
+    # PAH-contaminated line
+
+    x = np.linspace(0.1, 1.77, 100)
+
+    ax[0].plot(x, 1.4 * (x - 0.7) + 0.15, color="black", linestyle="-")
+    ax[0].plot([1.77, 3], [1.65, 1.65], color="black", linestyle="-")
+
+    ax[0].set_xlim([-1, 3])
+    ax[0].set_ylim([-0.5, 3.5])
+
+    ax[0].set_xlabel("[4.5] - [5.8]")
+    ax[0].set_ylabel("[3.6] - [4.5]")
+
+    ax[0].text(-0.5, 1.5, "Shock\nEmission")
+    ax[0].text(1, -0.3, "PAH Aper. Contam.")
+    ax[1].text(2.3, 2.5, "Class I")
+
+    # Fig b
+
+    ax[1].scatter(
+        phase_I["color45_58"] + (A4_5 - A5_8) * phase_I["Ak_NODEC"],
+        phase_I["color36_45"] + (A3_6 - A4_5) * phase_I["Ak_NODEC"],
+        color="grey",
+        alpha=0.5,
+        s=0.5,
+    )
+
+    ax[1].scatter(
+        class_I["color45_58"] + (A4_5 - A5_8) * class_I["Ak_NODEC"],
+        class_I["color36_45"] + (A3_6 - A4_5) * class_I["Ak_NODEC"],
+        color="black",
+        alpha=1,
+        s=1,
+    )
+
+    ax[1].scatter(
+        sed["color45_58"] + (A4_5 - A5_8) * sed["Ak_NODEC"],
+        sed["color36_45"] + (A3_6 - A4_5) * sed["Ak_NODEC"],
+        color="grey",
+        s=0.2,
+        alpha=0.5,
+    )
+
+    ax[1].scatter(
+        pah_contam["color45_58"] + (A4_5 - A5_8) * pah_contam["Ak_NODEC"],
+        pah_contam["color36_45"] + (A3_6 - A4_5) * pah_contam["Ak_NODEC"],
+        color="grey",
+        s=0.2,
+        alpha=0.5,
+    )
+
+    # sed line
+
+    x = np.linspace(0.42, 0.85, 100)
+    ax[1].plot([-1, 0.42], [1.05, 1.05], color="black", linestyle="-")
+    ax[1].plot(x, (1.2 / 0.55) * (x - 0.3) + 0.8, color="black", linestyle="-")
+    ax[1].plot([0.85, 0.85], [2, 3.5], color="black", linestyle="-")
+
+    # PAH-contaminated line
+
+    x = np.linspace(0.1, 1.77, 100)
+    ax[1].plot(x, 1.4 * (x - 0.7) + 0.15, color="black", linestyle="-")
+    ax[1].plot([1.77, 3], [1.65, 1.65], color="black", linestyle="-")
+
+    # Class I selection line
+
+    ax[1].plot([0.7, 1.09], [0.7, 0.7], color="black", linestyle="-")
+    ax[1].plot([0.7, 0.7], [0.7, 1.67], color="black", linestyle="-")
+
+    ax[1].set_xlim([-1, 3])
+    ax[1].set_ylim([-0.5, 3.5])
+
+    ax[1].set_xlabel("[4.5] - [5.8]")
+    ax[1].set_ylabel("[3.6] - [4.5]")
+
+    plt.savefig("../output/figures/YSO_phase_I_SED_PAH_" + cat + ".svg", format="svg")
+
+    ids_I = np.array(class_I["designation"])
 
     # Class II
     sigma_2 = phase_I["d3_6m"] + phase_I["d4_5m"]
     sigma_3 = phase_I["d4_5m"] + phase_I["d8_0m"]
     sigma_4 = phase_I["d3_6m"] + phase_I["d5_8m"]
 
-    phase_I_class_II = phase_I[
-        (phase_I["color45_80"] - sigma_3 > 0.5)
-        & (phase_I["color36_58"] - sigma_4 > 0.35)
-        & (
-            phase_I["color36_58"] + sigma_4
-            <= (0.14 / 0.04) * (phase_I["color45_80"] - sigma_3 - 0.5) + 0.5
+    class_II = phase_I.copy()
+
+    phase_I = phase_I[
+        ~(
+            (
+                phase_I["color45_80"] + (A4_5 - A8_0) * phase_I["Ak_NODEC"] - sigma_3
+                > 0.5
+            )
+            & (
+                phase_I["color36_58"] + (A3_6 - A5_8) * phase_I["Ak_NODEC"] - sigma_4
+                > 0.35
+            )
+            & (
+                phase_I["color36_58"] + (A3_6 - A5_8) * phase_I["Ak_NODEC"] + sigma_4
+                <= (0.14 / 0.04)
+                * (
+                    phase_I["color45_80"]
+                    + (A4_5 - A8_0) * phase_I["Ak_NODEC"]
+                    - sigma_3
+                    - 0.5
+                )
+                + 0.5
+            )
+            & (
+                phase_I["color36_45"] + (A3_6 - A4_5) * phase_I["Ak_NODEC"] - sigma_2
+                > 0.15
+            )
         )
-        & (phase_I["color36_45"] - sigma_2 > 0.15)
-        & ~(np.isin(phase_I["designation"], ids_I))
     ]
 
-    ids_I = np.array(phase_I_class_I["designation"])
-    ids_II = np.array(phase_I_class_II["designation"])
+    class_II = setdiff(class_II, phase_I, keys="designation")
 
-    phase_I_no_class = phase_I[
-        ~(np.isin(phase_I["designation"], ids_I))
-        & ~(np.isin(phase_I["designation"], ids_II))
-    ]
+    print
 
+    print(f"\n[Phase I] - {len(class_II)} Class II sources")
     print(
-        f"\n[Phase I] - Class I: {len(phase_I_class_I)}, Class II: {len(phase_I_class_II)}, Not Classified: {len(phase_I_no_class)}"
+        f"\n[Phase I] - Class I: {len(class_I)}, Class II: {len(class_II)}, Not Classified: {len(phase_I)}"
     )
 
-    _, ax = plt.subplots(figsize=(6, 6))
+    # Plotting Class II
+
+    _, ax = plt.subplots(figsize=(4, 4), constrained_layout=True)
 
     ax.scatter(
-        phase_I["color45_58"], phase_I["color36_45"], s=1, color="black", alpha=0.5
+        phase_I["color45_80"] + (A4_5 - A8_0) * phase_I["Ak_NODEC"],
+        phase_I["color36_58"] + (A3_6 - A5_8) * phase_I["Ak_NODEC"],
+        s=0.5,
+        alpha=0.5,
+        color="grey",
     )
     ax.scatter(
-        phase_I_class_I["color45_58"],
-        phase_I_class_I["color36_45"],
+        class_I["color45_80"] + (A4_5 - A8_0) * class_I["Ak_NODEC"],
+        class_I["color36_58"] + (A3_6 - A5_8) * class_I["Ak_NODEC"],
+        s=0.1,
+        alpha=0.5,
+        marker="+",
+        color="black",
+        label="class I",
+    )
+    ax.scatter(
+        class_II["color45_80"] + (A4_5 - A8_0) * class_II["Ak_NODEC"],
+        class_II["color36_58"] + (A3_6 - A5_8) * class_II["Ak_NODEC"],
         s=1,
-        color="blue",
-    )
-    ax.scatter(
-        phase_I_class_II["color45_58"],
-        phase_I_class_II["color36_45"],
-        s=1,
-        color="red",
+        alpha=1,
+        color="black",
+        label="class II",
     )
 
-    x_min, x_max = np.min(phase_I["color45_58"]), np.max(phase_I["color45_58"])
-    y_min, y_max = np.min(phase_I["color36_45"]), np.max(phase_I["color36_45"])
+    x = np.linspace(0.5, 6, 100)
 
-    x = np.linspace(x_min, x_max, 100)
+    ax.plot([0.5, 6], [0.5, 0.5], color="black", linestyle="-")
+    ax.plot(x, (0.14 / 0.04) * (x - 0.5) + 0.5, color="black", linestyle="-")
 
-    ax.axvline(1.05, color="black", linestyle="--")
+    ax.set_ylabel("[3.6] - [5.8]")
+    ax.set_xlabel("[4.5] - [8.0]")
 
-    ax.set_aspect("equal", adjustable="box")
-    ax.set_ylabel("[3.6] - [4.5]")
-    ax.set_xlabel("[4.5] - [5.8]")
-    ax.set_title("YSO candidates")
+    ax.set_xlim([-2, 6])
+    ax.set_ylim([-2, 6])
 
-    plt.savefig("../output/figures/YSO_phase_I_" + cat + ".png", format="png", dpi=300)
+    ax.text(4, 1, "Class II")
 
-    return phase_I_class_I, phase_I_class_II, phase_I_no_class
+    plt.savefig("../output/figures/YSO_phase_I_class_II_" + cat + ".svg", format="svg")
+
+    return class_I, class_II, phase_I
 
 
 def YSO_Phase_II(spitzer_sources, cat):
@@ -366,6 +612,8 @@ def YSO_Phase_II(spitzer_sources, cat):
     # line of sight extintion color is
 
     EJH_HK = 0.11 / 0.065
+
+    E3648_HK = 0.18
 
     HK_color = phase_II["magH"] - phase_II["magK"]
     JH_color = phase_II["magJ"] - phase_II["magH"]
