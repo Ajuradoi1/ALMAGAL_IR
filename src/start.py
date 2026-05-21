@@ -168,10 +168,33 @@ if (
 
     print("\ndone!")
 
-if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
-    # First we need to extract the extinction of each reagion using almaprops
+if (
+    input("Do you want to work onwards with ALMA matched sources? (y/n) ").lower()
+    == "y"
+):
+    spitzer_sources = spitzer_sources[(spitzer_sources["has_alma"])]
+    cat = cat + "_ALMA"
 
-    SURFD_to_Ak = (1 / (2.016)) * (6.022 * 1e23) * (1 / (1.6 * 1e22))
+if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
+    # We need to add 2MASS data to our spitzer catalog
+
+    if not os.path.isfile("../output/tables/spitzer_sources_" + cat + "_2mass.tbl"):
+        if not os.path.isfile("../output/tables/spitzer_2MASS_fp_psc.tbl"):
+            print("\n2MASS data missing, downloading...")
+            spitzer_data(alma_regions_file=alma_file, catalog="fp_psc", type="2MASS")
+
+        print("\nadding 2mass data to spitzer...")
+
+        spitzer_sources = twomass_to_spitzer(spitzer_sources, cat)
+    else:
+        spitzer_sources = Table.read(
+            "../output/tables/spitzer_sources_" + cat + "_2mass.tbl",
+            format="ascii.ipac",
+        )
+
+    # SURFD_to_Ak = (1 / (2.8)) * (6.022 * 1e23) * (1 / (8.4 * 1e21))
+    # 25
+    SURFD_to_Ak = 1 / (2.8 * 1.673 * 1e-24 * 8.4 * 1e21)
 
     # Build fast lookups
     deconv_lookup = dict(zip(alma_regions["INTERNAL_ID"], alma_regions["DECONV_SURFD"]))
@@ -194,24 +217,20 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
     )
 
     # Add columns
-    spitzer_sources["Ak_DECONV"] = mask_DECONV * SURFD_to_Ak / 10
-    spitzer_sources["Ak_NODEC"] = mask_NODEC * SURFD_to_Ak / 10
+    spitzer_sources["Ak_DECONV"] = mask_DECONV * SURFD_to_Ak
+    spitzer_sources["Ak_NODEC"] = mask_NODEC * SURFD_to_Ak
 
     mean_ak_nodec = np.mean(
-        spitzer_sources["Ak_NODEC"][
-            spitzer_sources["Ak_NODEC"] != -999 * SURFD_to_Ak / 10
-        ]
+        spitzer_sources["Ak_NODEC"][spitzer_sources["Ak_NODEC"] != -999 * SURFD_to_Ak]
     )
     mean_ak_deconv = np.mean(
-        spitzer_sources["Ak_DECONV"][
-            spitzer_sources["Ak_DECONV"] != -999 * SURFD_to_Ak / 10
-        ]
+        spitzer_sources["Ak_DECONV"][spitzer_sources["Ak_DECONV"] != -999 * SURFD_to_Ak]
     )
 
     for source in spitzer_sources:
-        if source["Ak_NODEC"] == -999 * SURFD_to_Ak / 10:
+        if source["Ak_NODEC"] == -999 * SURFD_to_Ak:
             source["Ak_NODEC"] = mean_ak_nodec
-        if source["Ak_DECONV"] == -999 * SURFD_to_Ak / 10:
+        if source["Ak_DECONV"] == -999 * SURFD_to_Ak:
             source["Ak_DECONV"] = mean_ak_deconv
 
     fig = plt.figure(figsize=(8, 6))
@@ -236,20 +255,8 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
 
     class_I, class_II, no_class = YSO_Phase_I(spitzer_sources, cat)
 
-    if not os.path.isfile("../output/tables/" + cat + "_2mass.tbl"):
-        if not os.path.isfile("../output/tables/spitzer_2MASS_fp_psc.tbl"):
-            print("\n2MASS data missing, downloading...")
-            spitzer_data(alma_regions_file=alma_file, catalog="fp_psc", type="2MASS")
-
-        print("\nadding 2mass data to spitzer...")
-
-        spitzer_sources = twomass_to_spitzer(spitzer_sources, cat)
-    else:
-        spitzer_sources = Table.read(
-            "../output/tables/" + cat + "_2mass.tbl", format="ascii.ipac"
-        )
-
     print("\nproceeding with phase II...")
 
-    # class_I_II, class_II_II, no_class_II = YSO_Phase_II(spitzer_sources, cat)
+    class_I_II, class_II_II, no_class_II = YSO_Phase_II(spitzer_sources, cat)
+
     print("\nYSO classification incomplete, phase II not implemented yet...")

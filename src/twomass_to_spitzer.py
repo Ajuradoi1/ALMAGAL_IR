@@ -27,7 +27,9 @@ def twomass_to_spitzer(spitzer_sources, cat):
         # spitzer_sources[col].dtype
 
     spitzer_sources.write(
-        "../output/tables/" + cat + "_2mass.tbl", format="ascii.ipac", overwrite=True
+        "../output/tables/spitzer_sources_" + cat + "_2mass.tbl",
+        format="ascii.ipac",
+        overwrite=True,
     )
 
     return spitzer_sources

@@ -11,6 +11,14 @@ os.makedirs("../output/figures", exist_ok=True)
 
 
 def YSO_Phase_I(spitzer_sources, cat):
+
+    def safe_setdiff(t1, t2, keys):
+        if len(t1) == 0:
+            return t1
+        if len(t2) == 0:
+            return t1
+        return setdiff(t1, t2, keys=keys)
+
     # < 0.2 mag error in all four bands
 
     A3_6 = 0.63
@@ -18,7 +26,7 @@ def YSO_Phase_I(spitzer_sources, cat):
     A5_8 = 0.49
     A8_0 = 0.55
 
-    # A3_6, A4_5, A5_8, A8_0 = [0, 0, 0, 0]
+    A3_6, A4_5, A5_8, A8_0 = [0, 0, 0, 0]
 
     # test purposes
 
@@ -87,7 +95,7 @@ def YSO_Phase_I(spitzer_sources, cat):
         )
     ]
 
-    pah_galaxies = setdiff(pah_galaxies, phase_I, keys="designation")
+    pah_galaxies = safe_setdiff(pah_galaxies, phase_I, keys="designation")
 
     print(f"\n[Phase I] - {len(pah_galaxies)} PAH galaxies removed")
 
@@ -222,7 +230,7 @@ def YSO_Phase_I(spitzer_sources, cat):
         )
     ]
 
-    agn_sources = setdiff(agn_sources, phase_I, keys="designation")
+    agn_sources = safe_setdiff(agn_sources, phase_I, keys="designation")
 
     print(f"\n[Phase I] - {len(agn_sources)} AGN sources removed")
 
@@ -316,7 +324,7 @@ def YSO_Phase_I(spitzer_sources, cat):
         )
     ]
 
-    sed = setdiff(sed, phase_I, keys="designation")
+    sed = safe_setdiff(sed, phase_I, keys="designation")
     print(f"\n[Phase I] - {len(sed)} Shock Emission Dominated sources removed")
 
     # Remove PAH contaminated sources
@@ -350,7 +358,7 @@ def YSO_Phase_I(spitzer_sources, cat):
         )
     ]
 
-    pah_contam = setdiff(pah_contam, phase_I, keys="designation")
+    pah_contam = safe_setdiff(pah_contam, phase_I, keys="designation")
     print(f"\n[Phase I] - {len(pah_contam)} PAH-contaminated apertures removed")
 
     # Class I
@@ -364,7 +372,7 @@ def YSO_Phase_I(spitzer_sources, cat):
         )
     ]
 
-    class_I = setdiff(class_I, phase_I, keys="designation")
+    class_I = safe_setdiff(class_I, phase_I, keys="designation")
     print(f"\n[Phase I] - {len(class_I)} Class I sources")
 
     # Plotting
@@ -525,7 +533,7 @@ def YSO_Phase_I(spitzer_sources, cat):
         )
     ]
 
-    class_II = setdiff(class_II, phase_I, keys="designation")
+    class_II = safe_setdiff(class_II, phase_I, keys="designation")
 
     print
 
@@ -587,14 +595,27 @@ def YSO_Phase_II(spitzer_sources, cat):
 
     phase_II = spitzer_sources[spitzer_sources["has_twomass"] == "True"]
 
-    print(phase_II)
+    phase_II.write(
+        "../output/tables/phase_II_" + cat + ".tbl", format="ascii.ipac", overwrite=True
+    )
+
+    """good = (  # mask is used to identify null values
+        ~spitzer_sources["d3_6m"].mask
+        & ~spitzer_sources["d4_5m"].mask
+        & ~spitzer_sources["d5_8m"].mask
+        & ~spitzer_sources["d8_0m"].mask
+    )
+
+    bad = (
+        (spitzer_sources["d3_6m"] > 0.2)
+        & (spitzer_sources["d4_5m"] > 0.2)
+        & (spitzer_sources["d5_8m"] > 0.2)
+        & (spitzer_sources["d8_0m"] > 0.2)
+    )"""
 
     phase_II = phase_II[
-        (phase_II["mag5_8"] == np.nan)
-        | (
-            phase_II["mag8_0"] == np.nan
-        )  # Only consider sources that lack detections either at 5.8 or 8.0 microns
-    ]
+        ~(phase_II["mag5_8"].mask) ^ ~(phase_II["mag8_0"].mask)
+    ]  # Only consider sources that lack detections either at 5.8 or 8.0 microns (using an XOR gate)
 
     phase_II = phase_II[
         (
