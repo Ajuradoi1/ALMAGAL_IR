@@ -30,7 +30,7 @@ from clumps_analysis import (
 
 from twomass_to_spitzer import twomass_to_spitzer
 
-from YSO_Gutermuth_09 import YSO_Phase_I, YSO_Phase_II
+from YSO_Gutermuth_09_copy import YSO_Phase_I, YSO_Phase_II
 
 if len(sys.argv) == 1:
     sys.argv.append("glimpse_s07")
@@ -251,7 +251,11 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
     plt.xlabel("Ak_DECONV")
     plt.savefig("../output/figures/Ak_histogram_" + cat + "_DECONV.svg", format="svg")
 
-    spitzer_sources.write("../output/tables/TEST", format="ascii.ipac", overwrite=True)
+    spitzer_sources.write(
+        "../output/tables/spitzer_sources_" + cat + "_2mass.tbl",
+        format="ascii.ipac",
+        overwrite=True,
+    )
 
     class_I, class_II, no_class = YSO_Phase_I(spitzer_sources, cat)
 
@@ -259,4 +263,11 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
 
     class_I_II, class_II_II, no_class_II = YSO_Phase_II(spitzer_sources, cat)
 
-    print("\nYSO classification incomplete, phase II not implemented yet...")
+    print(
+        "\nphase II is still under testing, it produces results but take them with care..."
+    )
+
+    print("\nsince phase II is under testing, phase III is not being done.")
+
+else:
+    print("\nanalysis finished.")
