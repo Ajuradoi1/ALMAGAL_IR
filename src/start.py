@@ -32,6 +32,8 @@ from twomass_to_spitzer import twomass_to_spitzer
 
 from YSO_Gutermuth_09 import YSO_Phase_I, YSO_Phase_II
 
+from YSO_statistics import YSO_plots
+
 if len(sys.argv) == 1:
     sys.argv.append("glimpse_s07")
     sys.argv.append("almaprops_2024_all_20250219.tab")
@@ -58,6 +60,16 @@ alma_sources = Table.from_pandas(
         delimiter=r"\s+",
     )
 )
+
+alma_sources.rename_column("S/N", "S_N")
+alma_sources.rename_column("FWHM_max/FWHM_min", "FWHM_max__FWHM_min")
+alma_sources.rename_column("Bmaj/Bmin", "Bmaj_Bmin")
+
+alma_sources.rename_column("CLUMP.1", "CLUMP_1")
+
+alma_sources.rename_column("Dcore/BEAM_size", "Dcore__Beam_size")
+alma_sources.rename_column("Lclump/Mclump", "Lclump_Mclump")
+alma_sources.rename_column("n(H2)", "n_H2")
 
 
 # alma_regions = alma_regions[0]
@@ -154,6 +166,10 @@ alma_sources["HAS_SPITZER"] = [
 ]
 
 
+alma_sources.write(
+    "../output/tables/ALMA_SOURCES_" + cat + ".tbl", format="ascii.ipac", overwrite=True
+)
+
 if (
     input("Do you want to perform the plots from the match table? (y/n) ").lower()
     == "y"
@@ -203,6 +219,35 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
     deconv_lookup = dict(zip(alma_regions["INTERNAL_ID"], alma_regions["DECONV_SURFD"]))
 
     nodec_lookup = dict(zip(alma_regions["INTERNAL_ID"], alma_regions["NODEC_SURFD"]))
+
+    if alma_proceeding:
+        m_lookup = dict(
+            zip(zip(alma_sources["CLUMP"], alma_sources["ID"]), alma_sources["Mclump"])
+        )
+        l_lookup = dict(
+            zip(zip(alma_sources["CLUMP"], alma_sources["ID"]), alma_sources["Lclump"])
+        )
+
+        mask_m = np.array(
+            [
+                m_lookup.get(zip(region, id), np.nan)
+                for region, id in zip(
+                    match_table["region_id"], match_table["alma_source"]
+                )
+            ]
+        )
+
+        mask_l = np.array(
+            [
+                l_lookup.get(zip(region, id), np.nan)
+                for region, id in zip(
+                    match_table["region_id"], match_table["alma_source"]
+                )
+            ]
+        )
+
+        spitzer_sources["Mclump"] = mask_m
+        spitzer_sources["Lclump"] = mask_l
 
     # Fill arrays safely
     mask_DECONV = np.array(
@@ -272,8 +317,18 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
         print("\nproceeding with phase II...")
         spitzer_sources = YSO_Phase_II(spitzer_sources, cat)
 
+        spitzer_sources.write(
+            "../output/tables/YSO_phase_II_" + cat + ".tbl",
+            format="ascii.ipac",
+            overwrite=True,
+        )
+        print("\nphase II completed")
+
     else:
         print("\nphase II is not implemented for sources without ALMA matches")
 
 else:
     print("\nanalysis finished.")
+
+
+YSO_plots(spitzer_sources, alma_proceeding, cat)

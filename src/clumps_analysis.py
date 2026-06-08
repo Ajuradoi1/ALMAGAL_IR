@@ -31,8 +31,9 @@ def alma_source_match(region, alma_sources, spitzer_sources):
             "spitzer_ra",
             "spitzer_dec",
             "separation_arcsec",
+            "alma_name",
         ],
-        units=[None, None, None, "deg", "deg", "deg", "deg", "arcsec deg"],
+        units=[None, None, None, "deg", "deg", "deg", "deg", "arcsec deg", None],
         dtype=[
             "str",
             "int64",
@@ -42,6 +43,7 @@ def alma_source_match(region, alma_sources, spitzer_sources):
             "float64",
             "float64",
             "float64",
+            "str",
         ],
     )
 
@@ -80,6 +82,9 @@ def alma_source_match(region, alma_sources, spitzer_sources):
                         spitzer_coord.ra.deg * u.deg,
                         spitzer_coord.dec.deg * u.deg,
                         (seps[spitzer_source] * 3600) * u.arcsec,
+                        str(alma_sources_cut["CLUMP"][0])
+                        + "_"
+                        + str(alma_sources_cut["ID"][alma_source]),
                     ]
                 )
 
@@ -113,8 +118,9 @@ def alma_match_table_fun(alma_regions_file: str, alma_sources_file: str, catalog
             "spitzer_ra",
             "spitzer_dec",
             "separation_arcsec",
+            "alma_name",
         ],
-        units=[None, None, None, "deg", "deg", "deg", "deg", "arcsec deg"],
+        units=[None, None, None, "deg", "deg", "deg", "deg", "arcsec deg", None],
         dtype=[
             "str",
             "int64",
@@ -124,6 +130,7 @@ def alma_match_table_fun(alma_regions_file: str, alma_sources_file: str, catalog
             "float64",
             "float64",
             "float64",
+            "str",
         ],
     )
 

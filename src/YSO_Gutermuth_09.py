@@ -69,31 +69,31 @@ def YSO_Phase_I(spitzer_sources, cat):
         ~(
             (
                 (
-                    phase_I["color45_58"] + (A4_5 - A5_8) * phase_I["Ak_NODEC"]
+                    phase_I["color45_58"] - (A4_5 - A5_8) * phase_I["Ak_NODEC"]
                     < (1.05 / 1.2)
                     * (
                         phase_I["color58_80"]
-                        + (A5_8 - A8_0) * phase_I["Ak_NODEC"]
+                        - (A5_8 - A8_0) * phase_I["Ak_NODEC"]
                         - 1.0
                     )
                 )
-                & (phase_I["color45_58"] + (A4_5 - A5_8) * phase_I["Ak_NODEC"] < 1.05)
-                & (phase_I["color58_80"] + (A5_8 - A8_0) * phase_I["Ak_NODEC"] > 1.0)
-                & (phase_I["mag4_5"] + A4_5 * phase_I["Ak_NODEC"] > 11.5)
+                & (phase_I["color45_58"] - (A4_5 - A5_8) * phase_I["Ak_NODEC"] < 1.05)
+                & (phase_I["color58_80"] - (A5_8 - A8_0) * phase_I["Ak_NODEC"] > 1.0)
+                & (phase_I["mag4_5"] - A4_5 * phase_I["Ak_NODEC"] > 11.5)
             )
             | (
-                (phase_I["color36_58"] + (A3_6 - A5_8) * phase_I["Ak_NODEC"] < 1.05)
-                & (phase_I["mag4_5"] + A4_5 * phase_I["Ak_NODEC"] > 11.5)
+                (phase_I["color36_58"] - (A3_6 - A5_8) * phase_I["Ak_NODEC"] < 1.05)
+                & (phase_I["mag4_5"] - A4_5 * phase_I["Ak_NODEC"] > 11.5)
                 & (
-                    phase_I["color36_58"] + (A3_6 - A5_8) * phase_I["Ak_NODEC"]
+                    phase_I["color36_58"] - (A3_6 - A5_8) * phase_I["Ak_NODEC"]
                     < (1.5 / 2)
                     * (
                         phase_I["color45_80"]
-                        + (A4_5 - A8_0) * phase_I["Ak_NODEC"]
+                        - (A4_5 - A8_0) * phase_I["Ak_NODEC"]
                         - 1.0
                     )
                 )
-                & (phase_I["color45_80"] + (A4_5 - A8_0) * phase_I["Ak_NODEC"] > 1.0)
+                & (phase_I["color45_80"] - (A4_5 - A8_0) * phase_I["Ak_NODEC"] > 1.0)
             )
         )
     ]
@@ -112,33 +112,33 @@ def YSO_Phase_I(spitzer_sources, cat):
     # Data points
 
     ax[0].scatter(
-        pah_galaxies["color58_80"] + (A5_8 - A8_0) * pah_galaxies["Ak_NODEC"],
-        pah_galaxies["color45_58"] + (A4_5 - A5_8) * pah_galaxies["Ak_NODEC"],
-        s=3,
+        pah_galaxies["color58_80"] - (A5_8 - A8_0) * pah_galaxies["Ak_NODEC"],
+        pah_galaxies["color45_58"] - (A4_5 - A5_8) * pah_galaxies["Ak_NODEC"],
+        s=10,
         color="black",
         alpha=1,
     )
 
     ax[0].scatter(
-        phase_I["color58_80"] + (A5_8 - A8_0) * phase_I["Ak_NODEC"],
-        phase_I["color45_58"] + (A4_5 - A5_8) * phase_I["Ak_NODEC"],
-        s=3,
+        phase_I["color58_80"] - (A5_8 - A8_0) * phase_I["Ak_NODEC"],
+        phase_I["color45_58"] - (A4_5 - A5_8) * phase_I["Ak_NODEC"],
+        s=10,
         color="grey",
         alpha=0.5,
     )
 
     ax[1].scatter(
-        pah_galaxies["color45_80"] + (A4_5 - A8_0) * pah_galaxies["Ak_NODEC"],
-        pah_galaxies["color36_58"] + (A3_6 - A5_8) * pah_galaxies["Ak_NODEC"],
-        s=3,
+        pah_galaxies["color45_80"] - (A4_5 - A8_0) * pah_galaxies["Ak_NODEC"],
+        pah_galaxies["color36_58"] - (A3_6 - A5_8) * pah_galaxies["Ak_NODEC"],
+        s=10,
         color="black",
         alpha=1,
     )
 
     ax[1].scatter(
-        phase_I["color45_80"] + (A4_5 - A8_0) * phase_I["Ak_NODEC"],
-        phase_I["color36_58"] + (A3_6 - A5_8) * phase_I["Ak_NODEC"],
-        s=3,
+        phase_I["color45_80"] - (A4_5 - A8_0) * phase_I["Ak_NODEC"],
+        phase_I["color36_58"] - (A3_6 - A5_8) * phase_I["Ak_NODEC"],
+        s=10,
         color="grey",
         alpha=0.5,
     )
@@ -202,40 +202,40 @@ def YSO_Phase_I(spitzer_sources, cat):
     phase_I = phase_I[
         ~(
             (
-                (phase_I["color45_80"] + (A4_5 - A8_0) * phase_I["Ak_NODEC"] > 0.5)
+                (phase_I["color45_80"] - (A4_5 - A8_0) * phase_I["Ak_NODEC"] > 0.5)
                 & (
-                    phase_I["mag4_5"] + (A4_5) * phase_I["Ak_NODEC"]
+                    phase_I["mag4_5"] - (A4_5) * phase_I["Ak_NODEC"]
                     > 13.5
                     + (
                         phase_I["color45_80"]
-                        + (A4_5 - A8_0) * phase_I["Ak_NODEC"]
+                        - (A4_5 - A8_0) * phase_I["Ak_NODEC"]
                         - 2.3
                     )
                     / 0.4
                 )
-                & (phase_I["mag4_5"] + (A4_5) * phase_I["Ak_NODEC"] > 13.5)
+                & (phase_I["mag4_5"] - (A4_5) * phase_I["Ak_NODEC"] > 13.5)
             )
             & (
                 (
-                    phase_I["mag4_5"] + A4_5 * phase_I["Ak_NODEC"]
+                    phase_I["mag4_5"] - A4_5 * phase_I["Ak_NODEC"]
                     > 14
                     + (
                         phase_I["color45_80"]
-                        + (A4_5 - A8_0) * phase_I["Ak_NODEC"]
+                        - (A4_5 - A8_0) * phase_I["Ak_NODEC"]
                         - 0.5
                     )
                 )
                 | (
-                    phase_I["mag4_5"] + A4_5 * phase_I["Ak_NODEC"]
+                    phase_I["mag4_5"] - A4_5 * phase_I["Ak_NODEC"]
                     > 14.5
                     - (
                         phase_I["color45_80"]
-                        + (A4_5 - A8_0) * phase_I["Ak_NODEC"]
+                        - (A4_5 - A8_0) * phase_I["Ak_NODEC"]
                         - 1.2
                     )
                     / 0.3
                 )
-                | (phase_I["mag4_5"] + A4_5 * phase_I["Ak_NODEC"] > 14.5)
+                | (phase_I["mag4_5"] - A4_5 * phase_I["Ak_NODEC"] > 14.5)
             )
         )
     ]
@@ -255,18 +255,18 @@ def YSO_Phase_I(spitzer_sources, cat):
     _, ax = plt.subplots(figsize=(4, 6), layout="tight")
 
     ax.scatter(
-        phase_I["color45_80"] + (A4_5 - A8_0) * phase_I["Ak_NODEC"],
-        phase_I["mag4_5"] + A4_5 * phase_I["Ak_NODEC"],
+        phase_I["color45_80"] - (A4_5 - A8_0) * phase_I["Ak_NODEC"],
+        phase_I["mag4_5"] - A4_5 * phase_I["Ak_NODEC"],
         color="grey",
         alpha=0.5,
-        s=2,
+        s=5,
     )
 
     ax.scatter(
-        agn_sources["color45_80"] + (A4_5 - A8_0) * agn_sources["Ak_NODEC"],
-        agn_sources["mag4_5"] + A4_5 * agn_sources["Ak_NODEC"],
+        agn_sources["color45_80"] - (A4_5 - A8_0) * agn_sources["Ak_NODEC"],
+        agn_sources["mag4_5"] - A4_5 * agn_sources["Ak_NODEC"],
         color="black",
-        s=3,
+        s=10,
         alpha=1,
     )
 
@@ -326,14 +326,14 @@ def YSO_Phase_I(spitzer_sources, cat):
     phase_I = phase_I[
         (
             ~(
-                (phase_I["color45_58"] + (A4_5 - A5_8) * phase_I["Ak_NODEC"] <= 0.85)
-                & (phase_I["color36_45"] + (A3_6 - A4_5) * phase_I["Ak_NODEC"] > 1.05)
+                (phase_I["color45_58"] - (A4_5 - A5_8) * phase_I["Ak_NODEC"] <= 0.85)
+                & (phase_I["color36_45"] - (A3_6 - A4_5) * phase_I["Ak_NODEC"] > 1.05)
                 & (
-                    phase_I["color36_45"] + (A3_6 - A4_5) * phase_I["Ak_NODEC"]
+                    phase_I["color36_45"] - (A3_6 - A4_5) * phase_I["Ak_NODEC"]
                     > (1.2 / 0.55)
                     * (
                         phase_I["color45_58"]
-                        + (A4_5 - A5_8) * phase_I["Ak_NODEC"]
+                        - (A4_5 - A5_8) * phase_I["Ak_NODEC"]
                         - 0.3
                     )
                     + 0.8
@@ -364,18 +364,18 @@ def YSO_Phase_I(spitzer_sources, cat):
             ~(
                 (
                     phase_I["color36_45"]
-                    + (A3_6 - A4_5) * phase_I["Ak_NODEC"]
+                    - (A3_6 - A4_5) * phase_I["Ak_NODEC"]
                     - sigma_2
                     <= 1.4
                     * (
-                        (phase_I["color45_58"] + (A4_5 - A5_8) * phase_I["Ak_NODEC"])
+                        (phase_I["color45_58"] - (A4_5 - A5_8) * phase_I["Ak_NODEC"])
                         + sigma_1
                         - 0.7
                     )
                 )
                 & (
                     phase_I["color36_45"]
-                    + (A3_6 - A4_5) * phase_I["Ak_NODEC"]
+                    - (A3_6 - A4_5) * phase_I["Ak_NODEC"]
                     - sigma_2
                     <= 1.65
                 )
@@ -398,8 +398,8 @@ def YSO_Phase_I(spitzer_sources, cat):
 
     phase_I = phase_I[
         ~(
-            (phase_I["color45_58"] + (A4_5 - A5_8) * phase_I["Ak_NODEC"] > 0.7)
-            & (phase_I["color36_45"] + (A3_6 - A4_5) * phase_I["Ak_NODEC"] > 0.7)
+            (phase_I["color45_58"] - (A4_5 - A5_8) * phase_I["Ak_NODEC"] > 0.7)
+            & (phase_I["color36_45"] - (A3_6 - A4_5) * phase_I["Ak_NODEC"] > 0.7)
         )
     ]
 
@@ -411,34 +411,34 @@ def YSO_Phase_I(spitzer_sources, cat):
     _, ax = plt.subplots(2, 1, figsize=(4, 6), constrained_layout=True)
 
     ax[0].scatter(
-        phase_I["color45_58"] + (A4_5 - A5_8) * phase_I["Ak_NODEC"],
-        phase_I["color36_45"] + (A3_6 - A4_5) * phase_I["Ak_NODEC"],
+        phase_I["color45_58"] - (A4_5 - A5_8) * phase_I["Ak_NODEC"],
+        phase_I["color36_45"] - (A3_6 - A4_5) * phase_I["Ak_NODEC"],
         color="grey",
         alpha=0.5,
-        s=2,
+        s=5,
     )
 
     ax[0].scatter(
-        class_I["color45_58"] + (A4_5 - A5_8) * class_I["Ak_NODEC"],
-        class_I["color36_45"] + (A3_6 - A4_5) * class_I["Ak_NODEC"],
+        class_I["color45_58"] - (A4_5 - A5_8) * class_I["Ak_NODEC"],
+        class_I["color36_45"] - (A3_6 - A4_5) * class_I["Ak_NODEC"],
         color="grey",
         alpha=0.5,
-        s=2,
+        s=5,
     )
 
     ax[0].scatter(
-        sed["color45_58"] + (A4_5 - A5_8) * sed["Ak_NODEC"],
-        sed["color36_45"] + (A3_6 - A4_5) * sed["Ak_NODEC"],
+        sed["color45_58"] - (A4_5 - A5_8) * sed["Ak_NODEC"],
+        sed["color36_45"] - (A3_6 - A4_5) * sed["Ak_NODEC"],
         color="black",
-        s=3,
+        s=10,
         alpha=1,
     )
 
     ax[0].scatter(
-        pah_contam["color45_58"] + (A4_5 - A5_8) * pah_contam["Ak_NODEC"],
-        pah_contam["color36_45"] + (A3_6 - A4_5) * pah_contam["Ak_NODEC"],
+        pah_contam["color45_58"] - (A4_5 - A5_8) * pah_contam["Ak_NODEC"],
+        pah_contam["color36_45"] - (A3_6 - A4_5) * pah_contam["Ak_NODEC"],
         color="black",
-        s=3,
+        s=10,
         alpha=1,
     )
 
@@ -470,34 +470,34 @@ def YSO_Phase_I(spitzer_sources, cat):
     # Fig b
 
     ax[1].scatter(
-        phase_I["color45_58"] + (A4_5 - A5_8) * phase_I["Ak_NODEC"],
-        phase_I["color36_45"] + (A3_6 - A4_5) * phase_I["Ak_NODEC"],
+        phase_I["color45_58"] - (A4_5 - A5_8) * phase_I["Ak_NODEC"],
+        phase_I["color36_45"] - (A3_6 - A4_5) * phase_I["Ak_NODEC"],
         color="grey",
         alpha=0.5,
-        s=2,
+        s=5,
     )
 
     ax[1].scatter(
-        class_I["color45_58"] + (A4_5 - A5_8) * class_I["Ak_NODEC"],
-        class_I["color36_45"] + (A3_6 - A4_5) * class_I["Ak_NODEC"],
+        class_I["color45_58"] - (A4_5 - A5_8) * class_I["Ak_NODEC"],
+        class_I["color36_45"] - (A3_6 - A4_5) * class_I["Ak_NODEC"],
         color="black",
         alpha=1,
-        s=3,
+        s=10,
     )
 
     ax[1].scatter(
-        sed["color45_58"] + (A4_5 - A5_8) * sed["Ak_NODEC"],
-        sed["color36_45"] + (A3_6 - A4_5) * sed["Ak_NODEC"],
+        sed["color45_58"] - (A4_5 - A5_8) * sed["Ak_NODEC"],
+        sed["color36_45"] - (A3_6 - A4_5) * sed["Ak_NODEC"],
         color="grey",
-        s=0.2,
+        s=2,
         alpha=0.5,
     )
 
     ax[1].scatter(
-        pah_contam["color45_58"] + (A4_5 - A5_8) * pah_contam["Ak_NODEC"],
-        pah_contam["color36_45"] + (A3_6 - A4_5) * pah_contam["Ak_NODEC"],
+        pah_contam["color45_58"] - (A4_5 - A5_8) * pah_contam["Ak_NODEC"],
+        pah_contam["color36_45"] - (A3_6 - A4_5) * pah_contam["Ak_NODEC"],
         color="grey",
-        s=0.2,
+        s=2,
         alpha=0.5,
     )
 
@@ -539,26 +539,26 @@ def YSO_Phase_I(spitzer_sources, cat):
     phase_I = phase_I[
         ~(
             (
-                phase_I["color45_80"] + (A4_5 - A8_0) * phase_I["Ak_NODEC"] - sigma_3
+                phase_I["color45_80"] - (A4_5 - A8_0) * phase_I["Ak_NODEC"] - sigma_3
                 > 0.5
             )
             & (
-                phase_I["color36_58"] + (A3_6 - A5_8) * phase_I["Ak_NODEC"] - sigma_4
+                phase_I["color36_58"] - (A3_6 - A5_8) * phase_I["Ak_NODEC"] - sigma_4
                 > 0.35
             )
             & (
-                phase_I["color36_58"] + (A3_6 - A5_8) * phase_I["Ak_NODEC"] + sigma_4
+                phase_I["color36_58"] - (A3_6 - A5_8) * phase_I["Ak_NODEC"] + sigma_4
                 <= (0.14 / 0.04)
                 * (
                     phase_I["color45_80"]
-                    + (A4_5 - A8_0) * phase_I["Ak_NODEC"]
+                    - (A4_5 - A8_0) * phase_I["Ak_NODEC"]
                     - sigma_3
                     - 0.5
                 )
                 + 0.5
             )
             & (
-                phase_I["color36_45"] + (A3_6 - A4_5) * phase_I["Ak_NODEC"] - sigma_2
+                phase_I["color36_45"] - (A3_6 - A4_5) * phase_I["Ak_NODEC"] - sigma_2
                 > 0.15
             )
         )
@@ -576,15 +576,15 @@ def YSO_Phase_I(spitzer_sources, cat):
     _, ax = plt.subplots(figsize=(4, 4), constrained_layout=True)
 
     ax.scatter(
-        phase_I["color45_80"] + (A4_5 - A8_0) * phase_I["Ak_NODEC"],
-        phase_I["color36_58"] + (A3_6 - A5_8) * phase_I["Ak_NODEC"],
-        s=2,
+        phase_I["color45_80"] - (A4_5 - A8_0) * phase_I["Ak_NODEC"],
+        phase_I["color36_58"] - (A3_6 - A5_8) * phase_I["Ak_NODEC"],
+        s=5,
         alpha=0.5,
         color="grey",
     )
     ax.scatter(
-        class_I["color45_80"] + (A4_5 - A8_0) * class_I["Ak_NODEC"],
-        class_I["color36_58"] + (A3_6 - A5_8) * class_I["Ak_NODEC"],
+        class_I["color45_80"] - (A4_5 - A8_0) * class_I["Ak_NODEC"],
+        class_I["color36_58"] - (A3_6 - A5_8) * class_I["Ak_NODEC"],
         s=0.1,
         alpha=0.5,
         marker="+",
@@ -592,9 +592,9 @@ def YSO_Phase_I(spitzer_sources, cat):
         label="class I",
     )
     ax.scatter(
-        class_II["color45_80"] + (A4_5 - A8_0) * class_II["Ak_NODEC"],
-        class_II["color36_58"] + (A3_6 - A5_8) * class_II["Ak_NODEC"],
-        s=3,
+        class_II["color45_80"] - (A4_5 - A8_0) * class_II["Ak_NODEC"],
+        class_II["color36_58"] - (A3_6 - A5_8) * class_II["Ak_NODEC"],
+        s=10,
         alpha=1,
         color="black",
         label="class II",
@@ -660,8 +660,8 @@ def YSO_Phase_II(spitzer_sources, cat):
 
     bad = (phase_II["h_msigcom"] > 0.1) & (phase_II["k_msigcom"] > 0.1)
 
-    notJ = ~(np.isnan(phase_II["j_msigcom"]))
-    phase_II = phase_II[good & ~bad]
+    goodJ = ~(np.isnan(phase_II["j_msigcom"]))
+    phase_II = phase_II[good & ~bad & goodJ]
 
     no_class = phase_II.copy()
 
@@ -732,44 +732,27 @@ def YSO_Phase_II(spitzer_sources, cat):
 
     # ratio respect Ak https://arxiv.org/pdf/0910.3037
 
+    A_J = 2.52
     A_H = 1.56
     A_K = 1
     A_36 = 0.63
     A_45 = 0.57
 
     for idx, source in enumerate(phase_II):
-        colorHK_0 = source["h_m"] - source["k_m"] + (A_H - A_K) * source["Ak_NODEC"]
+        colorHK_0 = source["h_m"] - source["k_m"] - (A_H - A_K) * source["Ak_NODEC"]
+        colorJH_0 = source["j_m"] - source["h_m"] - (A_J - A_H) * source["Ak_NODEC"]
         colorK_36_0 = (
-            source["k_m"] - source["mag3_6"] + (A_K - A_36) * source["Ak_NODEC"]
+            source["k_m"] - source["mag3_6"] - (A_K - A_36) * source["Ak_NODEC"]
         )
-        color36_45_0 = source["color36_45"] + (A_36 - A_45) * source["Ak_NODEC"]
+        color36_45_0 = source["color36_45"] - (A_36 - A_45) * source["Ak_NODEC"]
 
-        data_phase_II[idx] = [colorHK_0, colorK_36_0, color36_45_0]
+        data_phase_II[idx] = [colorHK_0, colorJH_0, colorK_36_0, color36_45_0]
 
     for idx, col in enumerate(
         #    ["colorHK_0", "colorJH_0", "colorK_36_0", "color36_45_0"]
-        ["colorHK_0", "colorK_36_0", "color36_45_0"]
+        ["colorHK_0", "colorJH_0", "colorK_36_0", "color36_45_0"]
     ):
         phase_II[col] = [data_phase_II[i][idx] for i in range(len(phase_II))]
-
-    phase_II.write(
-        "../output/tables/TestPhase_II.tbl", format="ascii.ipac", overwrite=True
-    )
-
-    _, ax = plt.subplots(1, 2, figsize=(12, 6), tight_layout=True)
-
-    ax[0].scatter(
-        phase_II["h_m"] - phase_II["k_m"],
-        phase_II["j_m"] - phase_II["h_m"],
-        s=2,
-        color="grey",
-    )
-    ax[0].set_ylabel("J-H")
-    ax[0].set_xlabel("H-K")
-    ax[0].set_xlim([-0.6, 2.5])
-    ax[0].set_ylim([0, 3])
-
-    plt.show()
 
     # We now apply conditions
 
@@ -792,40 +775,128 @@ def YSO_Phase_II(spitzer_sources, cat):
 
     class_II = safe_setdiff(class_II, phase_II, keys="designation")
 
-    _, ax = plt.subplots(1, 2, figsize=(12, 6), tight_layout=True)
+    # MARK: FIG 17
+
+    fig, ax = plt.subplots(1, 2, figsize=(12, 6), tight_layout=True)
 
     ax[0].scatter(
         phase_II["h_m"] - phase_II["k_m"],
         phase_II["j_m"] - phase_II["h_m"],
-        s=2,
+        s=5,
         color="grey",
     )
     ax[0].scatter(
         class_II["h_m"] - class_II["k_m"],
         class_II["j_m"] - class_II["h_m"],
-        s=3,
+        s=10,
         color="black",
     )
-    ax[0].set_ylabel("J-H")
-    ax[0].set_xlabel("H-K")
-    ax[0].set_xlim([-0.6, 5])
-    ax[0].set_ylim([0, 5])
+    ax[0].set_ylabel("[J - H]")
+    ax[0].set_xlabel("[H - K]")
+    ax[0].set_xlim([-0.6, 2.5])
+    ax[0].set_ylim([0, 3])
 
-    ax[1].scatter(phase_II["color36_45_0"], phase_II["colorHK_0"], s=2, color="grey")
-    ax[1].scatter(class_II["color36_45_0"], class_II["colorHK_0"], s=3, color="black")
+    ax[1].scatter(phase_II["color36_45_0"], phase_II["colorHK_0"], s=5, color="grey")
+    ax[1].scatter(class_II["color36_45_0"], class_II["colorHK_0"], s=10, color="black")
     ax[1].set_ylabel("[H-K]_0")
     ax[1].set_xlabel("[[3.6]-[4.5]]_0")
     ax[1].set_xlim([-1, 1.5])
     ax[1].set_ylim([-0.5, 2])
 
-    plt.savefig("../output/figures/YSO_phase_II_fig17_" + cat + ".svg", format="svg")
+    # Lines
 
-    plt.show()
+    """if len(phase_II) != 0 & len(class_II) != 0:
+        xmin, xmax = (
+            np.min(
+                [
+                    np.min(phase_II["h_m"] - phase_II["k_m"]),
+                    np.min(class_II["h_m"] - class_II["k_m"]),
+                ]
+            ),
+            np.max(
+                [
+                    np.max(phase_II["h_m"] - phase_II["k_m"]),
+                    np.max(class_II["h_m"] - class_II["k_m"]),
+                ]
+            ),
+        )
+    else:
+        if len(phase_II) != 0:
+            xmin, xmax = (
+                np.min(phase_II["h_m"] - phase_II["k_m"]),
+                np.max(phase_II["h_m"] - phase_II["k_m"]),
+            )
+        else:
+            xmin, xmax = (
+                np.min(class_II["h_m"] - class_II["k_m"]),
+                np.max(class_II["h_m"] - class_II["k_m"]),
+            )
+
+    x = np.linspace(xmin, xmax, 100)
+    """
+    x = np.linspace(-0.6, 2.5, 100)
+    cut = 0.14
+
+    cut_idx = np.searchsorted(x, cut)
+
+    ax[0].plot(
+        x[:cut_idx], np.zeros(len(x[:cut_idx])) + 0.6, color="black", linestyle="--"
+    )
+    ax[0].plot(x[cut_idx:], 0.58 * x[cut_idx:] + 0.52, color="black", linestyle="--")
+
+    ax[0].set_xlim(x[0], x[-1])
+
+    """if len(phase_II) != 0 & len(class_II) != 0:
+        xmin, xmax = (
+            np.min(
+                [
+                    np.min(phase_II["color36_45_0"]),
+                    np.min(class_II["color36_45_0"]),
+                ]
+            ),
+            np.max(
+                [
+                    np.max(phase_II["color36_45_0"]),
+                    np.max(class_II["color36_45_0"]),
+                ]
+            ),
+        )
+    else:
+        if len(phase_II) != 0:
+            xmin, xmax = (
+                np.min(phase_II["color36_45_0"]),
+                np.max(phase_II["color36_45_0"]),
+            )
+        else:
+            xmin, xmax = (
+                np.min(class_II["color36_45_0"]),
+                np.max(class_II["color36_45_0"]),
+            )
+
+    
+    x = np.linspace(xmin, xmax, 100)"""
+
+    x = np.linspace(-1, 1.5, 100)
+
+    cut = 0.06
+
+    cut_idx = np.searchsorted(x, cut)
+
+    ax[1].plot(
+        x[:cut_idx], np.zeros(len(x[:cut_idx])) + 0.2, color="black", linestyle="--"
+    )
+    ax[1].plot(x[cut_idx:], 1.33 * x[cut_idx:] + 0.133, color="black", linestyle="--")
+
+    # ax[1].set_xlim(x[0], x[-1])
+
+    fig.savefig("../output/figures/YSO_phase_II_fig17_" + cat + ".svg", format="svg")
+
+    # MARK: FIG 17b DE-REDDENING
 
     fig, ax = plt.subplots(1, 2, figsize=(12, 6), tight_layout=True)
 
-    ax[0].scatter(phase_II["color36_45_0"], phase_II["colorHK_0"], s=2, color="grey")
-    ax[0].scatter(class_II["color36_45_0"], class_II["colorHK_0"], s=5, color="black")
+    ax[0].scatter(phase_II["color36_45_0"], phase_II["colorHK_0"], s=5, color="grey")
+    ax[0].scatter(class_II["color36_45_0"], class_II["colorHK_0"], s=10, color="black")
 
     ax[0].set_ylabel("[H-K]_0")
     ax[0].set_xlabel("[[3.6]-[4.5]]_0")
@@ -835,23 +906,85 @@ def YSO_Phase_II(spitzer_sources, cat):
     ax[1].scatter(
         phase_II["color36_45"],
         phase_II["h_m"] - phase_II["k_m"],
-        s=2,
+        s=5,
         color="grey",
     )
     ax[1].scatter(
         class_II["color36_45"],
         class_II["h_m"] - class_II["k_m"],
-        s=5,
+        s=10,
         color="black",
     )
     ax[1].set_ylabel("[H-K]")
     ax[1].set_xlabel("[3.6 - 4.5]")
-    # ax[1].set_xlim([-0.6, 5])
-    # ax[1].set_ylim([0, 5])
+    # ax[1].set_xlim([-1, 1.5])
+    # ax[1].set_ylim([-0.5, 2])
 
-    fig.savefig("../output/figures/fig17_comp_" + cat + ".svg", format="svg")
+    if len(phase_II) != 0 & len(class_II) != 0:
+        xmin, xmax = (
+            np.min(
+                [
+                    np.min(phase_II["color36_45_0"]),
+                    np.min(class_II["color36_45_0"]),
+                ]
+            ),
+            np.max(
+                [
+                    np.max(phase_II["color36_45_0"]),
+                    np.max(class_II["color36_45_0"]),
+                ]
+            ),
+        )
+    else:
+        if len(phase_II) != 0:
+            xmin, xmax = (
+                np.min(phase_II["color36_45_0"]),
+                np.max(phase_II["color36_45_0"]),
+            )
+        else:
+            xmin, xmax = (
+                np.min(class_II["color36_45_0"]),
+                np.max(class_II["color36_45_0"]),
+            )
 
-    fig = plt.figure()
+    ax[0].set_xlim(xmin, xmax)
+
+    if len(phase_II) != 0 & len(class_II) != 0:
+        xmin, xmax = (
+            np.min(
+                [
+                    np.min(phase_II["mag3_6"] - phase_II["mag4_5"]),
+                    np.min(class_II["mag3_6"] - class_II["mag4_5"]),
+                ]
+            ),
+            np.max(
+                [
+                    np.max(phase_II["mag3_6"] - phase_II["mag4_5"]),
+                    np.max(class_II["mag3_6"] - class_II["mag4_5"]),
+                ]
+            ),
+        )
+    else:
+        if len(phase_II) != 0:
+            xmin, xmax = (
+                np.min(phase_II["mag3_6"] - phase_II["mag4_5"]),
+                np.max(phase_II["mag3_6"] - phase_II["mag4_5"]),
+            )
+        else:
+            xmin, xmax = (
+                np.min(class_II["mag3_6"] - class_II["mag4_5"]),
+                np.max(class_II["mag3_6"] - class_II["mag4_5"]),
+            )
+
+    ax[1].set_xlim(xmin, xmax)
+
+    fig.savefig(
+        "../output/figures/YSO_Phase_II_fig17_comp_" + cat + ".svg", format="svg"
+    )
+
+    # MARK: CLASS I/II
+
+    fig, ax = plt.subplots(1, 1, figsize=(6, 8), tight_layout=True)
 
     class_I = class_II.copy()
 
@@ -875,23 +1008,68 @@ def YSO_Phase_II(spitzer_sources, cat):
         f"[Phase II] - {len(class_II)} Class II objects, {len(class_I)} Class I objects"
     )
 
-    plt.scatter(class_II["color36_45_0"], class_II["colorK_36_0"], color="blue")
+    spitzer_sources["p2_class_I"] = False
+    spitzer_sources["p2_class_I"][
+        np.isin(spitzer_sources["designation"], class_I["designation"])
+    ] = True
 
-    plt.scatter(class_I["color36_45_0"], class_I["colorK_36_0"], color="red")
+    spitzer_sources["p2_class_II"] = False
+    spitzer_sources["p2_class_II"][
+        np.isin(spitzer_sources["designation"], class_II["designation"])
+    ] = True
 
-    # plt.xlim([-1,1.5])
-    # plt.ylim([-0.5,2.5])
+    spitzer_sources["p2_noclass"] = False
+    spitzer_sources["p2_noclass"][
+        np.isin(spitzer_sources["designation"], no_class["designation"])
+    ] = True
 
-    plt.ylabel("[K-[3.6]]_0")
-    plt.xlabel("[[3.6]-[4.5]]_0")
-
-    plt.savefig(
-        "../output/figures/YSO_phase_II_INCOMPLETE_" + cat + ".svg", format="svg"
+    ax.scatter(
+        class_II["color36_45_0"],
+        class_II["colorK_36_0"],
+        color="black",
+        s=25,
+        marker="o",
     )
 
-    plt.show()
-    print("AAAA")
+    ax.scatter(
+        class_I["color36_45_0"], class_I["colorK_36_0"], color="black", s=25, marker="x"
+    )
 
-    # Testing
+    ax.set_xlim([-1, 1.5])
+    ax.set_ylim([-0.5, 2.5])
 
-    return class_I, class_II, no_class
+    ax.set_ylabel("[K-[3.6]]_0")
+    ax.set_xlabel("[[3.6]-[4.5]]_0")
+
+    # lines
+
+    x = np.linspace(-1, 2, 1000)
+
+    cut_1 = 0.101
+    cut_2 = 0.276
+
+    cut_3 = 0.996
+
+    cut_1_idx = np.searchsorted(x, cut_1)
+    cut_2_idx = np.searchsorted(x, cut_2)
+    cut_3_idx = np.searchsorted(x, cut_3)
+
+    ax.plot([0.101, 0.101], [2.5, 0.5], color="black", linestyle="-")
+    ax.plot(
+        x[cut_1_idx:cut_2_idx],
+        -2.85714 * (x[cut_1_idx:cut_2_idx] - 0.101) + 0.5,
+        color="black",
+        linestyle="-",
+    )
+    ax.plot(x[cut_2_idx:], np.zeros(len(x[cut_2_idx:])), color="black", linestyle="-")
+
+    ax.plot(
+        x[cut_1_idx:cut_3_idx],
+        -2.85714 * (x[cut_1_idx:cut_3_idx] - 0.401) + 1.7,
+        color="black",
+        linestyle="--",
+    )
+
+    fig.savefig("../output/figures/YSO_phase_II_CC_" + cat + ".svg", format="svg")
+
+    return spitzer_sources
