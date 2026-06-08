@@ -30,7 +30,7 @@ from clumps_analysis import (
 
 from twomass_to_spitzer import twomass_to_spitzer
 
-from YSO_Gutermuth_09_copy import YSO_Phase_I, YSO_Phase_II
+from YSO_Gutermuth_09 import YSO_Phase_I, YSO_Phase_II
 
 if len(sys.argv) == 1:
     sys.argv.append("glimpse_s07")
@@ -174,6 +174,9 @@ if (
 ):
     spitzer_sources = spitzer_sources[(spitzer_sources["has_alma"])]
     cat = cat + "_ALMA"
+    alma_proceeding = True
+else:
+    alma_proceeding = False
 
 if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
     # We need to add 2MASS data to our spitzer catalog
@@ -257,17 +260,20 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
         overwrite=True,
     )
 
-    class_I, class_II, no_class = YSO_Phase_I(spitzer_sources, cat)
+    spitzer_sources = YSO_Phase_I(spitzer_sources, cat)
 
-    print("\nproceeding with phase II...")
-
-    class_I_II, class_II_II, no_class_II = YSO_Phase_II(spitzer_sources, cat)
-
-    print(
-        "\nphase II is still under testing, it produces results but take them with care..."
+    spitzer_sources.write(
+        "../output/tables/YSO_phase_I_" + cat + ".tbl",
+        format="ascii.ipac",
+        overwrite=True,
     )
 
-    print("\nsince phase II is under testing, phase III is not being done.")
+    if alma_proceeding:
+        print("\nproceeding with phase II...")
+        spitzer_sources = YSO_Phase_II(spitzer_sources, cat)
+
+    else:
+        print("\nphase II is not implemented for sources without ALMA matches")
 
 else:
     print("\nanalysis finished.")
