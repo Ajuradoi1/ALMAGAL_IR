@@ -11,7 +11,7 @@
 
 import sys
 import os
-from astropy.table import Table
+from astropy.table import Table, unique
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 from matplotlib import pyplot as plt
@@ -107,7 +107,7 @@ if (
             name=col,
             index=-1,
         )
-
+    spitzer_table = spitzer_table.drop_duplicates(subset="designation")
     spitzer_table.write(
         "../output/tables/spitzer_sources_" + cat + ".tbl",
         format="ascii.ipac",
@@ -154,10 +154,15 @@ spitzer_sources = Table.read(
     "../output/tables/spitzer_sources_" + cat + ".tbl",
     format="ipac",
 )
+spitzer_sources = unique(spitzer_sources, keys="designation")
 
 spitzer_sources["has_alma"] = [
     i in (match_table["spitzer_source"]) for i in spitzer_sources["designation"]
 ]
+
+print(
+    f"DIAGNOSTIC:\n\n\n{np.sum(spitzer_sources['has_alma'])}\n{len(match_table)}\n{len(np.unique(match_table['spitzer_source']))}"
+)
 
 match_keys_alma = set(zip(match_table["region_id"], match_table["alma_source"]))
 
@@ -188,7 +193,9 @@ if (
     input("Do you want to work onwards with ALMA matched sources? (y/n) ").lower()
     == "y"
 ):
+    print(f"AAAAAAAAAAAAAAAAAAA {len(spitzer_sources)}")
     spitzer_sources = spitzer_sources[(spitzer_sources["has_alma"])]
+    print(f"AAAAAAAAAAAAAAAAAAA {len(spitzer_sources)}")
     cat = cat + "_ALMA"
     alma_proceeding = True
 else:
@@ -230,8 +237,8 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
 
         mask_m = np.array(
             [
-                m_lookup.get(zip(region, id), np.nan)
-                for region, id in zip(
+                m_lookup.get((region, source_id), np.nan)
+                for region, source_id in zip(
                     match_table["region_id"], match_table["alma_source"]
                 )
             ]
@@ -239,12 +246,16 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
 
         mask_l = np.array(
             [
-                l_lookup.get(zip(region, id), np.nan)
-                for region, id in zip(
+                l_lookup.get((region, source_id), np.nan)
+                for region, source_id in zip(
                     match_table["region_id"], match_table["alma_source"]
                 )
             ]
         )
+
+        print(len(mask_m))
+        print(len(mask_l))
+        print(len(spitzer_sources))
 
         spitzer_sources["Mclump"] = mask_m
         spitzer_sources["Lclump"] = mask_l
@@ -288,7 +299,7 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
     )
     plt.ylabel("Density")
     plt.xlabel("Ak_NODEC")
-    plt.savefig("../output/figures/Ak_histogram_" + cat + "_NODEC.svg", format="svg")
+    plt.savefig("../output/figures/Ak_histogram_" + cat + "_NODEC.pdf", format="pdf")
 
     fig = plt.figure(figsize=(8, 6))
 
@@ -297,7 +308,7 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
     )
     plt.ylabel("Density")
     plt.xlabel("Ak_DECONV")
-    plt.savefig("../output/figures/Ak_histogram_" + cat + "_DECONV.svg", format="svg")
+    plt.savefig("../output/figures/Ak_histogram_" + cat + "_DECONV.pdf", format="pdf")
 
     spitzer_sources.write(
         "../output/tables/spitzer_sources_" + cat + "_2mass.tbl",
@@ -331,4 +342,4 @@ else:
     print("\nanalysis finished.")
 
 
-YSO_plots(spitzer_sources, alma_proceeding, cat)
+# YSO_plots(spitzer_sources, alma_proceeding, cat)

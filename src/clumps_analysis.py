@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from astropy import units as u
 from astropy.coordinates import SkyCoord
-from astropy.table import Table, QTable
+from astropy.table import Table, QTable, unique
 from matplotlib import pyplot as plt
 from multiprocessing import Pool, cpu_count
 from tqdm import tqdm
@@ -64,9 +64,7 @@ def alma_source_match(region, alma_sources, spitzer_sources):
         unit=(u.deg, u.deg),
         frame="icrs",
     )
-    radius = (
-        0.6 * u.arcsec + 0.25 * u.arcsec
-    )  # Spitzer resolution + ALMA resolution (assuming 0.25" for ALMA)
+    radius = 0.6 * u.arcsec  # Spitzer resolution (higher than ALMA's)
 
     for alma_source, alma_coord in enumerate(alma_coords, start=0):
         seps = alma_coords[alma_source].separation(spitzer_coords)
@@ -162,12 +160,18 @@ def alma_match_table_fun(alma_regions_file: str, alma_sources_file: str, catalog
 
     # print(match_table)
 
-    match_table.write(
+    # Sort by separation first
+    match_table.sort("separation_arcsec")
+
+    # Keep first occurrence of each spitzer source
+    match_table_unique = unique(match_table, keys="spitzer_source", keep="first")
+
+    match_table_unique.write(
         "../output/tables/match_table_" + catalog + ".tbl",
         format="ascii.ipac",
         overwrite=True,
     )
-    return match_table
+    return match_table_unique
 
 
 os.makedirs("../output", exist_ok=True)
@@ -183,12 +187,12 @@ def plot_separation_histogram(match_table, bins, catalog):
     plt.xlabel("Separation (arcseconds)")
     plt.ylabel("Number of Matches")
     plt.axvline(
-        0.85, color="black", linestyle="--", label="Matching Radius (0.85 arcsec)"
+        0.6, color="black", linestyle="--", label="Matching Radius (0.60 arcsec)"
     )
     plt.axvline(0.25, color="red", linestyle="-", label="ALMA Resolution (0.25 arcsec)")
     plt.legend()
     plt.grid(axis="y", alpha=0.75)
-    plt.savefig("../output/figures/match_" + catalog + "_hist.svg", format="svg")
+    plt.savefig("../output/figures/match_" + catalog + "_hist.pdf", format="pdf")
 
 
 def plot_source_matches_all(match_table, catalog):
@@ -197,9 +201,7 @@ def plot_source_matches_all(match_table, catalog):
 
     ax.scatter([0], [0], color="red", label="ALMA Source", alpha=1)
 
-    radius = (
-        0.6 * u.arcsec + 0.25 * u.arcsec
-    )  # Spitzer resolution + ALMA resolution (assuming 0.25" for ALMA)
+    radius = 0.6 * u.arcsec  # Spitzer resolution
 
     circle_total = plt.Circle(
         (0, 0),
@@ -207,7 +209,7 @@ def plot_source_matches_all(match_table, catalog):
         color="black",
         fill=False,
         linestyle="--",
-        label="Matching Radius (0.85 arcsec)",
+        label="Matching Radius (0.6 arcsec)",
     )
     ax.add_patch(circle_total)
     ax.set_ylim(-1, 1)
@@ -226,22 +228,22 @@ def plot_source_matches_all(match_table, catalog):
             color="blue",
             alpha=0.5,
         )
-    plt.savefig("../output/figures/match_" + catalog + "_plot.svg", format="svg")
+    plt.savefig("../output/figures/match_" + catalog + "_plot.pdf", format="pdf")
 
 
 def plot_match_heatmap(match_table, catalog: str):
 
-    def ring(radius, color, linewidth):
+    def ring(radius, color, linewidth, alpha):
         theta = np.linspace(0, 2 * np.pi, 500)
         x_r = radius * np.cos(theta)
         y_r = radius * np.sin(theta)
-        plt.plot(x_r, y_r, color=color, linewidth=linewidth, linestyle="--")
+        plt.plot(
+            x_r, y_r, color=color, linewidth=linewidth, linestyle="--", alpha=alpha
+        )
 
     x = []
     y = []
-    radius = (
-        0.6 * u.arcsec + 0.25 * u.arcsec
-    )  # Spitzer resolution + ALMA resolution (assuming 0.25" for ALMA)
+    radius = 0.6 * u.arcsec  # Spitzer resolution
     fig, ax = plt.subplots()
 
     for match in match_table:
@@ -301,7 +303,7 @@ def plot_match_heatmap(match_table, catalog: str):
     kde = gaussian_kde(xy)
 
     # fixed grid: x in [-1,1], y in [-1,1]
-    xi, yi = np.mgrid[-1:1:200j, -1:1:200j]
+    xi, yi = np.mgrid[-0.65:0.65:200j, -0.65:0.65:200j]
 
     zi = kde(np.vstack([xi.ravel(), yi.ravel()])).reshape(xi.shape)
 
@@ -310,7 +312,7 @@ def plot_match_heatmap(match_table, catalog: str):
     im = ax.imshow(
         zi.T,  # transpose is essential
         origin="lower",
-        extent=[-1, 1, -1, 1],
+        extent=[-0.65, 0.65, -0.65, 0.65],
         cmap="viridis",
         aspect="equal",
     )
@@ -319,11 +321,11 @@ def plot_match_heatmap(match_table, catalog: str):
     ax.scatter(x, y, color="white", alpha=0.3, s=5)
 
     # flip x so it goes 1 -> -1
-    ax.set_xlim(1, -1)
-    ax.set_ylim(-1, 1)
+    ax.set_xlim(0.65, -0.65)
+    ax.set_ylim(-0.65, 0.65)
 
-    ring(radius, "black", 2)
-    ring(0.25, "red", 1)
+    ring(radius, "white", linewidth=2, alpha=1)
+    ring(0.25, "red", linewidth=2, alpha=0.8)
     ax.scatter(0, 0, color="red", linewidth=1, s=300, marker="+")
 
     ax.set_aspect("equal", adjustable="box")
@@ -333,5 +335,5 @@ def plot_match_heatmap(match_table, catalog: str):
 
     plt.tight_layout()
 
-    plt.colorbar(im, ax=ax)
-    plt.savefig("../output/figures/match_" + catalog + "_heatmap.svg", format="svg")
+    plt.colorbar(im, ax=ax, label="Density")
+    plt.savefig("../output/figures/match_" + catalog + "_heatmap.pdf", format="pdf")
