@@ -730,7 +730,7 @@ def YSO_Phase_II(spitzer_sources, cat):
 
     # Ak_NODEC
 
-    # ratio respect Ak https://arxiv.org/pdf/0910.3037
+    # ratio respect Ak https://ui.adsabs.harvard.edu/abs/2009ApJ...707...89G/abstract
 
     A_J = 2.52
     A_H = 1.56
@@ -775,9 +775,11 @@ def YSO_Phase_II(spitzer_sources, cat):
 
     class_II = safe_setdiff(class_II, phase_II, keys="designation")
 
+    class_II = class_II[class_II["mag3_6"] - A_36 < 14.5]
+    phase_II = phase_II[phase_II["mag3_6"] - A_36 < 15]
     # MARK: FIG 17
 
-    fig, ax = plt.subplots(1, 2, figsize=(12, 6), tight_layout=True)
+    fig, ax = plt.subplots(2, 1, figsize=(4, 6), tight_layout=True)
 
     ax[0].scatter(
         phase_II["h_m"] - phase_II["k_m"],
@@ -893,7 +895,7 @@ def YSO_Phase_II(spitzer_sources, cat):
 
     # MARK: FIG 17b DE-REDDENING
 
-    fig, ax = plt.subplots(1, 2, figsize=(12, 6), tight_layout=True)
+    fig, ax = plt.subplots(1, 2, figsize=(4, 6), tight_layout=True)
 
     ax[0].scatter(phase_II["color36_45_0"], phase_II["colorHK_0"], s=5, color="grey")
     ax[0].scatter(class_II["color36_45_0"], class_II["colorHK_0"], s=10, color="black")
@@ -984,7 +986,7 @@ def YSO_Phase_II(spitzer_sources, cat):
 
     # MARK: CLASS I/II
 
-    fig, ax = plt.subplots(1, 1, figsize=(6, 8), tight_layout=True)
+    fig, ax = plt.subplots(1, 1, figsize=(4, 6), layout="tight")
 
     class_I = class_II.copy()
 
@@ -1069,6 +1071,8 @@ def YSO_Phase_II(spitzer_sources, cat):
         color="black",
         linestyle="--",
     )
+
+    plt.tight_layout()
 
     fig.savefig("../output/figures/YSO_phase_II_CC_" + cat + ".pdf", format="pdf")
 

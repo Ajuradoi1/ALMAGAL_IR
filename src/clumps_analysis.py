@@ -178,19 +178,22 @@ os.makedirs("../output", exist_ok=True)
 os.makedirs("../output/figures", exist_ok=True)
 
 
-def plot_separation_histogram(match_table, bins, catalog):
-    plt.figure(figsize=(8, 6))
+def plot_separation_histogram(match_table, bin_width, catalog):
+    plt.figure(figsize=(5, 4))
     plt.hist(
-        match_table["separation_arcsec"], bins=bins, color="skyblue", edgecolor="black"
+        match_table["separation_arcsec"],
+        bins=np.array(range(0, 65, bin_width)) / 100,
+        color="skyblue",
+        edgecolor="black",
     )
-    plt.title("Distribution of Separations Between ALMA and Spitzer Sources")
+    # plt.title("Distribution of Separations Between ALMA and Spitzer Sources")
     plt.xlabel("Separation (arcseconds)")
-    plt.ylabel("Number of Matches")
+    plt.ylabel("Matches")
     plt.axvline(
         0.6, color="black", linestyle="--", label="Matching Radius (0.60 arcsec)"
     )
     plt.axvline(0.25, color="red", linestyle="-", label="ALMA Resolution (0.25 arcsec)")
-    plt.legend()
+
     plt.grid(axis="y", alpha=0.75)
     plt.savefig("../output/figures/match_" + catalog + "_hist.pdf", format="pdf")
 
@@ -217,7 +220,7 @@ def plot_source_matches_all(match_table, catalog):
     ax.set_ylabel("Declination (arcsec)")
     ax.set_xlabel("Right Ascension (arcsec)")
     ax.set_aspect("equal", adjustable="box")
-    ax.set_title("Composition of spitzer sources around ALMA sources")
+    # ax.set_title("Composition of spitzer sources around ALMA sources")
 
     for match in match_table:
         ax.scatter(
@@ -331,7 +334,7 @@ def plot_match_heatmap(match_table, catalog: str):
     ax.set_aspect("equal", adjustable="box")
     ax.set_ylabel("Declination (arcsec)")
     ax.set_xlabel("Right Ascension (arcsec)")
-    ax.set_title("Distribution of Spitzer sources around ALMA sources")
+    # ax.set_title("Distribution of Spitzer sources around ALMA sources")
 
     plt.tight_layout()
 

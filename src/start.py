@@ -51,6 +51,7 @@ alma_file = sys.argv[2]
 alma_sources_file = sys.argv[3]
 alma_regions = Table.read("../alma_input/" + alma_file, format="ascii.ipac")
 
+
 # alma_sources = Table.read("../alma_input/" + alma_sources_file, format="ascii.ipac")
 alma_sources = Table.from_pandas(
     pd.read_csv(
@@ -146,9 +147,8 @@ else:
     match_table = Table.read(
         "../output/tables/match_table_" + cat + ".tbl", format="ipac"
     )
-    print(
-        f"\nmatch table found, skipping matching... {len(match_table)} matches found\n"
-    )
+    print(f"\nmatch table found, skipping matching... {len(match_table)} matches found")
+    print(f"\n{len(set(match_table['region_id']))} ALMA regions have matches\n")
 
 spitzer_sources = Table.read(
     "../output/tables/spitzer_sources_" + cat + ".tbl",
@@ -159,10 +159,6 @@ spitzer_sources = unique(spitzer_sources, keys="designation")
 spitzer_sources["has_alma"] = [
     i in (match_table["spitzer_source"]) for i in spitzer_sources["designation"]
 ]
-
-print(
-    f"DIAGNOSTIC:\n\n\n{np.sum(spitzer_sources['has_alma'])}\n{len(match_table)}\n{len(np.unique(match_table['spitzer_source']))}"
-)
 
 match_keys_alma = set(zip(match_table["region_id"], match_table["alma_source"]))
 
@@ -181,7 +177,7 @@ if (
 ):
     print("\nplotting...\n")
 
-    plot_separation_histogram(match_table=match_table, bins=20, catalog=cat)
+    plot_separation_histogram(match_table=match_table, bin_width=5, catalog=cat)
 
     plot_source_matches_all(match_table=match_table, catalog=cat)
 
@@ -193,12 +189,12 @@ if (
     input("Do you want to work onwards with ALMA matched sources? (y/n) ").lower()
     == "y"
 ):
-    print(f"AAAAAAAAAAAAAAAAAAA {len(spitzer_sources)}")
     spitzer_sources = spitzer_sources[(spitzer_sources["has_alma"])]
-    print(f"AAAAAAAAAAAAAAAAAAA {len(spitzer_sources)}")
+    cat_name = cat
     cat = cat + "_ALMA"
     alma_proceeding = True
 else:
+    cat_name = cat
     alma_proceeding = False
 
 if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
@@ -218,21 +214,37 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
             format="ascii.ipac",
         )
 
-    # SURFD_to_Ak = (1 / (2.8)) * (6.022 * 1e23) * (1 / (8.4 * 1e21))
-    # 25
-    SURFD_to_Ak = 1 / (2.8 * 1.673 * 1e-24 * 8.4 * 1e21)
-
-    # Build fast lookups
-    deconv_lookup = dict(zip(alma_regions["INTERNAL_ID"], alma_regions["DECONV_SURFD"]))
-
-    nodec_lookup = dict(zip(alma_regions["INTERNAL_ID"], alma_regions["NODEC_SURFD"]))
-
     if alma_proceeding:
+        # SURFD_to_Ak = (1 / (2.8)) * (6.022 * 1e23) * (1 / (8.4 * 1e21))
+        # 25
+        # SURFD_to_Ak = 1 / (2.8 * 1.673 * 1e-24 * 8.4 * 1e21)
+        SURFD_to_Ak = (
+            (
+                0.112 / 2.21e21
+            )  # Ak = 0.112 Av, Av = (2.21e21)^-1 n(H2). C_k = 5.07e-23 [mag cm^2]
+            * 6.022e23  # Avogadro's constant (N_A) [particles/mol]
+            / 2.016  # molecular mass of n(H2) [g/mol]
+        )
+        # Build fast lookups
+        deconv_lookup = dict(
+            zip(alma_regions["INTERNAL_ID"], alma_regions["DECONV_SURFD"])
+        )
+
+        nodec_lookup = dict(
+            zip(alma_regions["INTERNAL_ID"], alma_regions["NODEC_SURFD"])
+        )
+
         m_lookup = dict(
-            zip(zip(alma_sources["CLUMP"], alma_sources["ID"]), alma_sources["Mclump"])
+            zip(
+                zip(alma_sources["CLUMP"], alma_sources["ID"]),
+                alma_sources["Mclump"],
+            )
         )
         l_lookup = dict(
-            zip(zip(alma_sources["CLUMP"], alma_sources["ID"]), alma_sources["Lclump"])
+            zip(
+                zip(alma_sources["CLUMP"], alma_sources["ID"]),
+                alma_sources["Lclump"],
+            )
         )
 
         mask_m = np.array(
@@ -253,62 +265,65 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
             ]
         )
 
-        print(len(mask_m))
-        print(len(mask_l))
-        print(len(spitzer_sources))
-
         spitzer_sources["Mclump"] = mask_m
         spitzer_sources["Lclump"] = mask_l
 
-    # Fill arrays safely
-    mask_DECONV = np.array(
-        [
-            deconv_lookup.get(region, np.nan)
-            for region in spitzer_sources["internal_id_01"]
-        ]
-    )
+        # Fill arrays safely
+        mask_DECONV = np.array(
+            [
+                deconv_lookup.get(region, np.nan)
+                for region in spitzer_sources["internal_id_01"]
+            ]
+        )
 
-    mask_NODEC = np.array(
-        [
-            nodec_lookup.get(region, np.nan)
-            for region in spitzer_sources["internal_id_01"]
-        ]
-    )
+        mask_NODEC = np.array(
+            [
+                nodec_lookup.get(region, np.nan)
+                for region in spitzer_sources["internal_id_01"]
+            ]
+        )
 
-    # Add columns
-    spitzer_sources["Ak_DECONV"] = mask_DECONV * SURFD_to_Ak
-    spitzer_sources["Ak_NODEC"] = mask_NODEC * SURFD_to_Ak
+        # Add columns
+        spitzer_sources["Ak_DECONV"] = mask_DECONV * SURFD_to_Ak
+        spitzer_sources["Ak_NODEC"] = mask_NODEC * SURFD_to_Ak
+        mean_ak_nodec = np.mean(
+            spitzer_sources["Ak_NODEC"][
+                spitzer_sources["Ak_NODEC"] != -999 * SURFD_to_Ak
+            ]
+        )
+        mean_ak_deconv = np.mean(
+            spitzer_sources["Ak_DECONV"][
+                spitzer_sources["Ak_DECONV"] != -999 * SURFD_to_Ak
+            ]
+        )
 
-    mean_ak_nodec = np.mean(
-        spitzer_sources["Ak_NODEC"][spitzer_sources["Ak_NODEC"] != -999 * SURFD_to_Ak]
-    )
-    mean_ak_deconv = np.mean(
-        spitzer_sources["Ak_DECONV"][spitzer_sources["Ak_DECONV"] != -999 * SURFD_to_Ak]
-    )
+        for source in spitzer_sources:
+            if source["Ak_NODEC"] == -999 * SURFD_to_Ak:
+                source["Ak_NODEC"] = mean_ak_nodec
+            if source["Ak_DECONV"] == -999 * SURFD_to_Ak:
+                source["Ak_DECONV"] = mean_ak_deconv
 
-    for source in spitzer_sources:
-        if source["Ak_NODEC"] == -999 * SURFD_to_Ak:
-            source["Ak_NODEC"] = mean_ak_nodec
-        if source["Ak_DECONV"] == -999 * SURFD_to_Ak:
-            source["Ak_DECONV"] = mean_ak_deconv
+        fig = plt.figure(figsize=(4, 6), tight_layout=True)
 
-    fig = plt.figure(figsize=(8, 6))
-
-    plt.hist(
-        spitzer_sources["Ak_NODEC"], bins=50, alpha=0.5, label="NODEC", density=True
-    )
-    plt.ylabel("Density")
-    plt.xlabel("Ak_NODEC")
-    plt.savefig("../output/figures/Ak_histogram_" + cat + "_NODEC.pdf", format="pdf")
-
-    fig = plt.figure(figsize=(8, 6))
-
-    plt.hist(
-        spitzer_sources["Ak_DECONV"], bins=50, alpha=0.5, label="DECONV", density=True
-    )
-    plt.ylabel("Density")
-    plt.xlabel("Ak_DECONV")
-    plt.savefig("../output/figures/Ak_histogram_" + cat + "_DECONV.pdf", format="pdf")
+        plt.hist(
+            spitzer_sources["Ak_NODEC"],
+            bins=range(0, 125, 5),
+            alpha=0.5,
+            label="NODEC",
+            color="blue",
+        )
+        plt.hist(
+            spitzer_sources["Ak_DECONV"],
+            bins=range(0, 125, 5),
+            alpha=0.5,
+            label="DECONV",
+            color="red",
+        )
+        plt.ylabel("Regions")
+        plt.xlabel("Ak")
+        plt.xlim([0, 125])
+        plt.legend()
+        plt.savefig("../output/figures/Ak_histogram_" + cat_name + ".pdf", format="pdf")
 
     spitzer_sources.write(
         "../output/tables/spitzer_sources_" + cat + "_2mass.tbl",
