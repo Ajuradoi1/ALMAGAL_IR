@@ -18,6 +18,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 
+# MARK: ALMA_SOURCE_MATCH
 
 def alma_source_match(region, alma_sources, spitzer_sources):
 
@@ -88,6 +89,7 @@ def alma_source_match(region, alma_sources, spitzer_sources):
 
     return match_table_local
 
+# MARK: ALMA_MATCH_TABLE_FUN
 
 def alma_match_table_fun(alma_regions_file: str, alma_sources_file: str, catalog: str):
 
@@ -177,6 +179,7 @@ def alma_match_table_fun(alma_regions_file: str, alma_sources_file: str, catalog
 os.makedirs("../output", exist_ok=True)
 os.makedirs("../output/figures", exist_ok=True)
 
+# MARK: ALMA_MATCH_PLOTS
 
 def plot_separation_histogram(match_table, bin_width, catalog):
     plt.figure(figsize=(5, 4))
@@ -321,7 +324,7 @@ def plot_match_heatmap(match_table, catalog: str):
     )
 
     # overlay points
-    ax.scatter(x, y, color="white", alpha=0.3, s=5)
+    ax.scatter(x, y, color="black", alpha=0.6, s=1,marker='x',linewidth=10)
 
     # flip x so it goes 1 -> -1
     ax.set_xlim(0.65, -0.65)

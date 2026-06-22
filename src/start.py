@@ -49,10 +49,8 @@ elif len(sys.argv) == 2:
 cat = sys.argv[1]
 alma_file = sys.argv[2]
 alma_sources_file = sys.argv[3]
+
 alma_regions = Table.read("../alma_input/" + alma_file, format="ascii.ipac")
-
-
-# alma_sources = Table.read("../alma_input/" + alma_sources_file, format="ascii.ipac")
 alma_sources = Table.from_pandas(
     pd.read_csv(
         "../alma_input/" + alma_sources_file,
@@ -61,6 +59,11 @@ alma_sources = Table.from_pandas(
         delimiter=r"\s+",
     )
 )
+spitzer_sources = Table.read(
+    "../output/tables/spitzer_sources_" + cat + ".tbl",
+    format="ipac",
+)
+spitzer_sources = unique(spitzer_sources, keys="designation")
 
 alma_sources.rename_column("S/N", "S_N")
 alma_sources.rename_column("FWHM_max/FWHM_min", "FWHM_max__FWHM_min")
@@ -73,11 +76,9 @@ alma_sources.rename_column("Lclump/Mclump", "Lclump_Mclump")
 alma_sources.rename_column("n(H2)", "n_H2")
 
 
-# alma_regions = alma_regions[0]
-
 # Loading scripts
 
-
+'''
 if not os.path.isfile("../output/tables/spitzer_sources_" + cat + ".tbl"):
     print("\ndownloading spitzer catalog...\n")
     spitzer_data(alma_regions_file=alma_file, catalog=cat, type="sources")
@@ -117,7 +118,7 @@ if (
 
     print(f"\n your table is ready! {len(cols)} columns have been added")
 else:
-    print("\nskipping...")
+    print("\nskipping...")'''
 
 if not os.path.isfile(
     "../output/alma_sources/"
@@ -149,12 +150,6 @@ else:
     )
     print(f"\nmatch table found, skipping matching... {len(match_table)} matches found")
     print(f"\n{len(set(match_table['region_id']))} ALMA regions have matches\n")
-
-spitzer_sources = Table.read(
-    "../output/tables/spitzer_sources_" + cat + ".tbl",
-    format="ipac",
-)
-spitzer_sources = unique(spitzer_sources, keys="designation")
 
 spitzer_sources["has_alma"] = [
     i in (match_table["spitzer_source"]) for i in spitzer_sources["designation"]
@@ -324,6 +319,10 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
         plt.xlim([0, 125])
         plt.legend()
         plt.savefig("../output/figures/Ak_histogram_" + cat_name + ".pdf", format="pdf")
+    else:
+        # Ak values are not available for sources without ALMA matches, so we will take zero as a placeholder for the Ak values in the YSO classification. This is not ideal, but it allows us to proceed with the classification for sources without ALMA matches.
+        spitzer_sources["Ak_DECONV"] = 0.0
+        spitzer_sources["Ak_NODEC"] = 0.0
 
     spitzer_sources.write(
         "../output/tables/spitzer_sources_" + cat + "_2mass.tbl",
