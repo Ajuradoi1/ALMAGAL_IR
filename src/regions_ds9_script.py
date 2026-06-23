@@ -1,24 +1,17 @@
 # Loading libraries
-
 import os
 import pandas as pd
 from astropy.table import Table
-
-# catalog = 'glimpse2_v2cat'
-# catalog = 'glimpse_s07'
 
 
 def regions_ds9(alma_regions_file: str, alma_sources_file: str, catalog: str):
 
     alma_regions = Table.read("../alma_input/" + alma_regions_file, format="ascii.ipac")
-    # print(alma_regions[:2])
-    # print("\n\n\n")
+
 
     spitzer_sources = Table.read(
         "../output/tables/spitzer_sources_" + catalog + "_download.tbl", format="ascii.ipac"
     )
-    # print(spitzer_sources[:2])
-    # print("\n\n\n")
 
     alma_sources = pd.read_csv(
         "../alma_input/" + alma_sources_file,
@@ -26,8 +19,6 @@ def regions_ds9(alma_regions_file: str, alma_sources_file: str, catalog: str):
         skiprows=[2],
         delimiter="\s+",
     )
-    # print(alma_sources[6001:6004])
-    # print("\n\n\n")
 
     os.makedirs("../output/alma_sources", exist_ok=True)
 

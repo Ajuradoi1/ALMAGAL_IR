@@ -52,11 +52,6 @@ def YSO_Phase_I(spitzer_sources, cat):
         f"\n\n[Phase I] - {len(phase_I)} sources with good photometry in all four IRAC bands"
     )
 
-    """phase_I.write(
-        "../output/tables/phase_I_" + cat + ".tbl",
-        format="ascii.ipac",
-        overwrite=True,
-    )"""
 
     # MARK: PAH GALAXIES
     # Remove PAH galaxies
@@ -777,6 +772,7 @@ def YSO_Phase_II(spitzer_sources, cat):
 
     class_II = class_II[class_II["mag3_6"] - A_36 < 14.5]
     phase_II = phase_II[phase_II["mag3_6"] - A_36 < 15]
+
     # MARK: FIG 17
 
     fig, ax = plt.subplots(2, 1, figsize=(4, 6), tight_layout=True)
@@ -807,35 +803,6 @@ def YSO_Phase_II(spitzer_sources, cat):
 
     # Lines
 
-    """if len(phase_II) != 0 & len(class_II) != 0:
-        xmin, xmax = (
-            np.min(
-                [
-                    np.min(phase_II["h_m"] - phase_II["k_m"]),
-                    np.min(class_II["h_m"] - class_II["k_m"]),
-                ]
-            ),
-            np.max(
-                [
-                    np.max(phase_II["h_m"] - phase_II["k_m"]),
-                    np.max(class_II["h_m"] - class_II["k_m"]),
-                ]
-            ),
-        )
-    else:
-        if len(phase_II) != 0:
-            xmin, xmax = (
-                np.min(phase_II["h_m"] - phase_II["k_m"]),
-                np.max(phase_II["h_m"] - phase_II["k_m"]),
-            )
-        else:
-            xmin, xmax = (
-                np.min(class_II["h_m"] - class_II["k_m"]),
-                np.max(class_II["h_m"] - class_II["k_m"]),
-            )
-
-    x = np.linspace(xmin, xmax, 100)
-    """
     x = np.linspace(-0.6, 2.5, 100)
     cut = 0.14
 
@@ -848,36 +815,6 @@ def YSO_Phase_II(spitzer_sources, cat):
 
     ax[0].set_xlim(x[0], x[-1])
 
-    """if len(phase_II) != 0 & len(class_II) != 0:
-        xmin, xmax = (
-            np.min(
-                [
-                    np.min(phase_II["color36_45_0"]),
-                    np.min(class_II["color36_45_0"]),
-                ]
-            ),
-            np.max(
-                [
-                    np.max(phase_II["color36_45_0"]),
-                    np.max(class_II["color36_45_0"]),
-                ]
-            ),
-        )
-    else:
-        if len(phase_II) != 0:
-            xmin, xmax = (
-                np.min(phase_II["color36_45_0"]),
-                np.max(phase_II["color36_45_0"]),
-            )
-        else:
-            xmin, xmax = (
-                np.min(class_II["color36_45_0"]),
-                np.max(class_II["color36_45_0"]),
-            )
-
-    
-    x = np.linspace(xmin, xmax, 100)"""
-
     x = np.linspace(-1, 1.5, 100)
 
     cut = 0.06
@@ -888,8 +825,6 @@ def YSO_Phase_II(spitzer_sources, cat):
         x[:cut_idx], np.zeros(len(x[:cut_idx])) + 0.2, color="black", linestyle="--"
     )
     ax[1].plot(x[cut_idx:], 1.33 * x[cut_idx:] + 0.133, color="black", linestyle="--")
-
-    # ax[1].set_xlim(x[0], x[-1])
 
     fig.savefig("../output/figures/YSO_phase_II_fig17_" + cat + ".pdf", format="pdf")
 
@@ -902,8 +837,6 @@ def YSO_Phase_II(spitzer_sources, cat):
 
     ax[0].set_ylabel("[H-K]_0")
     ax[0].set_xlabel("[[3.6]-[4.5]]_0")
-    # ax[0].set_xlim([-1, 1.5])
-    # ax[0].set_ylim([-0.5, 2])
 
     ax[1].scatter(
         phase_II["color36_45"],
@@ -919,8 +852,6 @@ def YSO_Phase_II(spitzer_sources, cat):
     )
     ax[1].set_ylabel("[H-K]")
     ax[1].set_xlabel("[3.6 - 4.5]")
-    # ax[1].set_xlim([-1, 1.5])
-    # ax[1].set_ylim([-0.5, 2])
 
     if len(phase_II) != 0 & len(class_II) != 0:
         xmin, xmax = (

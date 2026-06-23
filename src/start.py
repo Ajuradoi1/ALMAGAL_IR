@@ -12,9 +12,7 @@
 import sys
 import os
 from astropy.table import Table, unique
-from astropy.coordinates import SkyCoord
 from astropy.table import join
-from astropy import units as u
 from matplotlib import pyplot as plt
 
 import numpy as np
@@ -28,7 +26,6 @@ from clumps_analysis import (
     plot_source_matches_all,
     plot_match_heatmap,
 )
-
 from twomass_to_spitzer import twomass_to_spitzer
 
 from YSO_Gutermuth_09 import YSO_Phase_I, YSO_Phase_II
@@ -60,7 +57,6 @@ alma_sources = Table.from_pandas(
         delimiter=r"\s+",
     )
 )
-
 
 alma_sources.rename_column("S/N", "S_N")
 alma_sources.rename_column("FWHM_max/FWHM_min", "FWHM_max__FWHM_min")
@@ -98,41 +94,6 @@ obs_array = np.array(
 )
 
 spitzer_sources["obs_sample"] = obs_array
-
-"""
-if (
-    input("\ndoes this catalog has archival data you want to add? (y/n) ").lower()
-    == "y"
-):
-    arch = input("\nplease enter the archival data catalog:")
-    cols = (
-        input('\nwhat columns do you want to add? (enter them separated by ",")')
-        .lower()
-        .split(",")
-    )
-
-    spitzer_table = Table.read(
-        "../output/tables/spitzer_sources_" + cat + ".tbl",
-        format="ipac",
-    )
-    arch_table = Table.read("../output/tables/spitzer_sources_" + arch + ".tbl")
-
-    for col in cols:
-        spitzer_table = spitzer_table.add_column(
-            arch_table[spitzer_table["designation"] == arch_table["designation"]][col],
-            name=col,
-            index=-1,
-        )
-    spitzer_table = spitzer_table.drop_duplicates(subset="designation")
-    spitzer_table.write(
-        "../output/tables/spitzer_sources_" + cat + ".tbl",
-        format="ascii.ipac",
-        overwrite=True,
-    )
-
-    print(f"\n your table is ready! {len(cols)} columns have been added")
-else:
-    print("\nskipping...")"""
 
 if not os.path.isfile(
     "../output/alma_sources/"
@@ -258,7 +219,6 @@ else:
 if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
     # We need to add 2MASS data to our spitzer catalog
 
-
     if not os.path.isfile("../output/tables/spitzer_2MASS_fp_psc_download.tbl"):
         print("\n2MASS data missing, downloading...")
         spitzer_data(alma_regions_file=alma_file, catalog="fp_psc", type="2MASS")
@@ -284,9 +244,6 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
     spitzer_sources.remove_columns(['INTERNAL_ID'])
 
     if alma_proceeding:
-        # SURFD_to_Ak = (1 / (2.8)) * (6.022 * 1e23) * (1 / (8.4 * 1e21))
-        # 25
-        # SURFD_to_Ak = 1 / (2.8 * 1.673 * 1e-24 * 8.4 * 1e21)
         SURFD_to_Ak = (
             (
                 0.112 / 2.21e21
@@ -294,63 +251,6 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
             * 6.022e23  # Avogadro's constant (N_A) [particles/mol]
             / 2.016  # molecular mass of n(H2) [g/mol]
         )
-        '''# Build fast lookups
-        deconv_lookup = dict(
-            zip(alma_regions["INTERNAL_ID"], alma_regions["DECONV_SURFD"])
-        )
-
-        nodec_lookup = dict(
-            zip(alma_regions["INTERNAL_ID"], alma_regions["NODEC_SURFD"])
-        )
-
-        m_lookup = dict(
-            zip(
-                zip(alma_sources["CLUMP"], alma_sources["ID"]),
-                alma_sources["Mclump"],
-            )
-        )
-        l_lookup = dict(
-            zip(
-                zip(alma_sources["CLUMP"], alma_sources["ID"]),
-                alma_sources["Lclump"],
-            )
-        )
-
-        mask_m = np.array(
-            [
-                m_lookup.get((region, source_id), np.nan)
-                for region, source_id in zip(
-                    match_table["region_id"], match_table["alma_source"]
-                )
-            ]
-        )
-
-        mask_l = np.array(
-            [
-                l_lookup.get((region, source_id), np.nan)
-                for region, source_id in zip(
-                    match_table["region_id"], match_table["alma_source"]
-                )
-            ]
-        )
-
-        spitzer_sources["Mclump"] = mask_m
-        spitzer_sources["Lclump"] = mask_l
-
-        # Fill arrays safely
-        mask_DECONV = np.array(
-            [
-                deconv_lookup.get(region, np.nan)
-                for region in spitzer_sources["internal_id_01"]
-            ]
-        )
-
-        mask_NODEC = np.array(
-            [
-                nodec_lookup.get(region, np.nan)
-                for region in spitzer_sources["internal_id_01"]
-            ]
-        )'''
 
         spitzer_sources = join(
             spitzer_sources,
@@ -400,89 +300,11 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
             color="red",
         )
 
-        """plt.hist(
-            spitzer_sources["Ak_NODEC"][spitzer_sources["obs_sample"] == "near"],
-            bins=range(0, 125, 5),
-            alpha=1,
-            color="blue",
-            linestyle="-",
-            linewidth=2,
-            histtype="step",
-            label="NODEC_near",
-        )
-
-        plt.hist(
-            spitzer_sources["Ak_NODEC"][spitzer_sources["obs_sample"] == "far"],
-            bins=range(0, 125, 5),
-            alpha=1,
-            color="blue",
-            linestyle="-",
-            linewidth=2,
-            histtype="step",
-            label="NODEC_far",
-        )
-
-        plt.hist(
-            spitzer_sources["Ak_DECONV"][spitzer_sources["obs_sample"] == "near"],
-            bins=range(0, 125, 5),
-            alpha=1,
-            color="red",
-            linestyle="-",
-            linewidth=2,
-            histtype="step",
-            label="DECONV_near",
-        )
-
-        plt.hist(
-            spitzer_sources["Ak_DECONV"][spitzer_sources["obs_sample"] == "near"],
-            bins=range(0, 125, 5),
-            alpha=1,
-            color="red",
-            linestyle="--",
-            linewidth=2,
-            histtype="step",
-            label="DECONV_far",
-        )"""
-
         plt.ylabel("Regions")
         plt.xlabel("Ak")
         plt.xlim([0, 125])
         plt.legend()
         plt.savefig("../output/figures/Ak_histogram_" + cat_name + ".pdf", format="pdf")
-
-        '''fig, axs = plt.subplots(2, 1, figsize=(6, 6), sharex=True, tight_layout=True)
-
-        axs[0].hist(
-            spitzer_sources["Ak_NODEC"],
-            bins=range(0, 125, 5),
-            color="grey",
-            label="all",
-        )
-
-        axs[0].hist(
-            spitzer_sources["Ak_NODEC"][spitzer_sources["obs_sample"] == "near"],
-            bins=range(0, 125, 5),
-            color="blue",
-            label=r"$d > 3700$ pc",
-            stacked=True,
-        )
-
-        axs[1].hist(
-            spitzer_sources["Ak_DECONV"],
-            bins=range(0, 125, 5),
-            color="grey",
-            label="all",
-        )
-
-        axs[1].hist(
-            spitzer_sources["Ak_DECONV"][spitzer_sources["obs_sample"] == "near"],
-            bins=range(0, 125, 5),
-            color="red",
-            stacked=True,
-            label=r"$d > 3700$ pc",
-        )
-
-        fig.savefig("../output/figures/Ak_histogram_" + cat_name + ".pdf", format="pdf")'''
 
     else:
         # Ak values are not available for sources without ALMA matches, so we will take zero as a placeholder for the Ak values in the YSO classification. This is not ideal, but it allows us to proceed with the classification for sources without ALMA matches.
@@ -531,8 +353,6 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
         alma_regions.write('../output/tables/alma_regions_YSO_PLOTS.tbl', format='ascii.ipac', overwrite=True)
 else:
     print("\nanalysis finished.")
-
-
 
 
 # YSO_plots(spitzer_sources, alma_proceeding, cat)

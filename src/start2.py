@@ -1,11 +1,4 @@
-import sys
-import os
-from astropy.table import Table, unique
-from astropy.coordinates import SkyCoord
-from astropy.table import join
-from astropy import units as u
-from matplotlib import pyplot as plt
-import pandas as pd
+from astropy.table import Table
 from YSO_statistics import YSO_plots
 
 

@@ -9,10 +9,9 @@ import os
 
 def spitzer_data(alma_regions_file: str, catalog: str, type: str):
 
-    # filename = "almaprops_2024_all_20250219.tab"
     filename = alma_regions_file
     alma_regions = Table.read(f"../alma_input/{filename}", format="ascii.ipac")
-    # print(alma_regions)
+
 
     os.makedirs("../output", exist_ok=True)
     os.makedirs("../output/tables", exist_ok=True)
@@ -39,13 +38,9 @@ def spitzer_data(alma_regions_file: str, catalog: str, type: str):
     url = "https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-query"
     file = {"filename": open("../output/tables/alma_regions_coordinates.tbl", "rb")}
 
-    # catalog = 'glimpse2_v2cat'
-    # catalog = 'glimpse_s07'
-
     data = {"catalog": catalog, "spatial": "Upload", "uradius": 60, "outfmt": 1}
 
     response = requests.post(url, files=file, data=data)
-    # print(response.text)
     if (
         response.text.split(" list")[0]
         == '[struct stat="ERROR", msg="The catalog is not on the'

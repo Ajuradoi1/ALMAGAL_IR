@@ -93,21 +93,6 @@ def alma_source_match(region, alma_sources, spitzer_sources):
 
 def alma_match_table_fun(spitzer_sources: Table, alma_regions: Table, alma_sources: Table, catalog: str):
 
-    '''alma_regions = Table.read("../alma_input/" + alma_regions_file, format="ascii.ipac")
-
-    spitzer_sources = Table.read(
-        "../output/tables/spitzer_sources_" + catalog + ".tbl", format="ascii.ipac"
-    )
-
-    alma_sources = Table.from_pandas(
-        pd.read_csv(
-            "../alma_input/" + alma_sources_file,
-            comment="\\",
-            skiprows=[2],
-            delimiter="\s+",
-        )
-    )'''
-
     match_table = QTable(
         names=[
             "region_id",
@@ -262,47 +247,6 @@ def plot_match_heatmap(match_table, catalog: str):
         )
         y.append(((match["spitzer_dec"] - match["alma_dec"]) * 3600))
 
-        """ax.scatter(
-            x[-1],
-            y[-1],
-            color="blue",
-            alpha=0.5,
-        )"""
-    """
-    xy = np.vstack([x, y])
-    xy = np.vstack(
-        [
-            np.array(x) + np.random.normal(0, 1e-6, len(x)),
-            np.array(y) + np.random.normal(0, 1e-6, len(y)),
-        ]
-    )
-    kde = gaussian_kde(xy)
-
-    # grid
-
-    xi, yi = np.mgrid[max(x) : min(x) : 500j, min(y) : max(y) : 500j]
-    zi = kde(np.vstack([xi.flatten(), yi.flatten()]))
-
-    im = ax.imshow(
-        zi.reshape(xi.shape), origin="lower", extent=[1, -1, -1, 1], cmap="viridis"
-    )
-
-    ring(radius, "black", 2)
-    ring(0.25, "red", 1)
-    ax.scatter(0, 0, color="red", linewidth=1, s=300, marker="+")
-
-    cbar = plt.colorbar(im, ax=ax)
-    cbar.set_label(label="Density")
-    # plt.colorbar(im, ax=ax)
-
-    ax.set_aspect("equal", adjustable="box")
-    ax.set_ylabel("Declination (arcsec)")
-    ax.set_xlabel("Right Ascension (arcsec)")
-    ax.set_title("Distribution of Spitzer sources around ALMA sources")
-
-    plt.tight_layout()
-    """
-
     # x, y = your data
 
     xy = np.vstack([x, y])
@@ -313,7 +257,7 @@ def plot_match_heatmap(match_table, catalog: str):
 
     zi = kde(np.vstack([xi.ravel(), yi.ravel()])).reshape(xi.shape)
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(tight_layout=True)
 
     im = ax.imshow(
         zi.T,  # transpose is essential
@@ -339,7 +283,5 @@ def plot_match_heatmap(match_table, catalog: str):
     ax.set_xlabel("Right Ascension (arcsec)")
     # ax.set_title("Distribution of Spitzer sources around ALMA sources")
 
-    plt.tight_layout()
-
-    plt.colorbar(im, ax=ax, label="Density")
-    plt.savefig("../output/figures/match_" + catalog + "_heatmap.pdf", format="pdf")
+    fig.colorbar(im, ax=ax, label="Density")
+    fig.savefig("../output/figures/match_" + catalog + "_heatmap.pdf", format="pdf")
