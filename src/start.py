@@ -13,6 +13,7 @@ import sys
 import os
 from astropy.table import Table, unique
 from astropy.coordinates import SkyCoord
+from astropy.table import join
 from astropy import units as u
 from matplotlib import pyplot as plt
 
@@ -59,11 +60,7 @@ alma_sources = Table.from_pandas(
         delimiter=r"\s+",
     )
 )
-spitzer_sources = Table.read(
-    "../output/tables/spitzer_sources_" + cat + ".tbl",
-    format="ipac",
-)
-spitzer_sources = unique(spitzer_sources, keys="designation")
+
 
 alma_sources.rename_column("S/N", "S_N")
 alma_sources.rename_column("FWHM_max/FWHM_min", "FWHM_max__FWHM_min")
@@ -78,7 +75,7 @@ alma_sources.rename_column("n(H2)", "n_H2")
 
 # Loading scripts
 
-'''
+
 if not os.path.isfile("../output/tables/spitzer_sources_" + cat + ".tbl"):
     print("\ndownloading spitzer catalog...\n")
     spitzer_data(alma_regions_file=alma_file, catalog=cat, type="sources")
@@ -86,6 +83,21 @@ else:
     print("\nthis catalog already exists, skipping download...")
 
 
+spitzer_sources = Table.read(
+    "../output/tables/spitzer_sources_" + cat + ".tbl",
+    format="ipac",
+)
+spitzer_sources = unique(spitzer_sources, keys="designation")
+
+obs_sample_map = dict(zip(alma_regions["INTERNAL_ID"], alma_regions["OBS_SAMPLE"]))
+
+obs_array = np.array(
+    [obs_sample_map.get(region, np.nan) for region in spitzer_sources["internal_id_01"]]
+)
+
+spitzer_sources["obs_sample"] = obs_array
+
+"""
 if (
     input("\ndoes this catalog has archival data you want to add? (y/n) ").lower()
     == "y"
@@ -118,7 +130,7 @@ if (
 
     print(f"\n your table is ready! {len(cols)} columns have been added")
 else:
-    print("\nskipping...")'''
+    print("\nskipping...")"""
 
 if not os.path.isfile(
     "../output/alma_sources/"
@@ -298,7 +310,7 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
             if source["Ak_DECONV"] == -999 * SURFD_to_Ak:
                 source["Ak_DECONV"] = mean_ak_deconv
 
-        fig = plt.figure(figsize=(4, 6), tight_layout=True)
+        '''fig = plt.figure(figsize=(4, 6), tight_layout=True)
 
         plt.hist(
             spitzer_sources["Ak_NODEC"],
@@ -314,11 +326,93 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
             label="DECONV",
             color="red",
         )
+
+        """plt.hist(
+            spitzer_sources["Ak_NODEC"][spitzer_sources["obs_sample"] == "near"],
+            bins=range(0, 125, 5),
+            alpha=1,
+            color="blue",
+            linestyle="-",
+            linewidth=2,
+            histtype="step",
+            label="NODEC_near",
+        )
+
+        plt.hist(
+            spitzer_sources["Ak_NODEC"][spitzer_sources["obs_sample"] == "far"],
+            bins=range(0, 125, 5),
+            alpha=1,
+            color="blue",
+            linestyle="-",
+            linewidth=2,
+            histtype="step",
+            label="NODEC_far",
+        )
+
+        plt.hist(
+            spitzer_sources["Ak_DECONV"][spitzer_sources["obs_sample"] == "near"],
+            bins=range(0, 125, 5),
+            alpha=1,
+            color="red",
+            linestyle="-",
+            linewidth=2,
+            histtype="step",
+            label="DECONV_near",
+        )
+
+        plt.hist(
+            spitzer_sources["Ak_DECONV"][spitzer_sources["obs_sample"] == "near"],
+            bins=range(0, 125, 5),
+            alpha=1,
+            color="red",
+            linestyle="--",
+            linewidth=2,
+            histtype="step",
+            label="DECONV_far",
+        )"""
+
         plt.ylabel("Regions")
         plt.xlabel("Ak")
         plt.xlim([0, 125])
         plt.legend()
-        plt.savefig("../output/figures/Ak_histogram_" + cat_name + ".pdf", format="pdf")
+        plt.savefig("../output/figures/Ak_histogram_" + cat_name + ".pdf", format="pdf")'''
+
+        fig, axs = plt.subplots(2, 1, figsize=(6, 6), sharex=True, tight_layout=True)
+
+        axs[0].hist(
+            spitzer_sources["Ak_NODEC"],
+            bins=range(0, 125, 5),
+            color="grey",
+            label="all",
+        )
+
+        axs[0].hist(
+            spitzer_sources["Ak_NODEC"][spitzer_sources["obs_sample"] == "near"],
+            bins=range(0, 125, 5),
+            color="blue",
+            label=r"$d > 3700$ pc",
+            stacked=True,
+        )
+
+        axs[1].hist(
+            spitzer_sources["Ak_DECONV"],
+            bins=range(0, 125, 5),
+            color="grey",
+            label="all",
+        )
+
+        axs[1].hist(
+            spitzer_sources["Ak_DECONV"][spitzer_sources["obs_sample"] == "near"],
+            bins=range(0, 125, 5),
+            color="red",
+            stacked=True,
+            label=r"$d > 3700$ pc",
+        )
+        axs[0].legend(True)
+        axs[1].legend(True)
+
+        fig.savefig("../output/figures/Ak_histogram_" + cat_name + ".pdf", format="pdf")
+
     else:
         # Ak values are not available for sources without ALMA matches, so we will take zero as a placeholder for the Ak values in the YSO classification. This is not ideal, but it allows us to proceed with the classification for sources without ALMA matches.
         spitzer_sources["Ak_DECONV"] = 0.0
