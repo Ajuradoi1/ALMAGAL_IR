@@ -53,7 +53,7 @@ def spitzer_data(alma_regions_file: str, catalog: str, type: str):
         print("invalid catalog name, please use a spitzer one.\n")
         exit()
     else:
-        with open(f"../output/tables/spitzer_{type}_{catalog}.tbl", "w") as f:
+        with open(f"../output/tables/spitzer_{type}_{catalog}_download.tbl", "w") as f:
             f.write(response.text)
 
             print("done!\n")

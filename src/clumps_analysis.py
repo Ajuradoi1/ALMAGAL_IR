@@ -91,9 +91,9 @@ def alma_source_match(region, alma_sources, spitzer_sources):
 
 # MARK: ALMA_MATCH_TABLE_FUN
 
-def alma_match_table_fun(alma_regions_file: str, alma_sources_file: str, catalog: str):
+def alma_match_table_fun(spitzer_sources: Table, alma_regions: Table, alma_sources: Table, catalog: str):
 
-    alma_regions = Table.read("../alma_input/" + alma_regions_file, format="ascii.ipac")
+    '''alma_regions = Table.read("../alma_input/" + alma_regions_file, format="ascii.ipac")
 
     spitzer_sources = Table.read(
         "../output/tables/spitzer_sources_" + catalog + ".tbl", format="ascii.ipac"
@@ -106,7 +106,7 @@ def alma_match_table_fun(alma_regions_file: str, alma_sources_file: str, catalog
             skiprows=[2],
             delimiter="\s+",
         )
-    )
+    )'''
 
     match_table = QTable(
         names=[

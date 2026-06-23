@@ -6,7 +6,7 @@ import numpy as np
 
 def twomass_to_spitzer(spitzer_sources, cat):
 
-    twomass = Table.read("../output/tables/spitzer_2MASS_fp_psc.tbl", format="ipac")
+    twomass = Table.read("../output/tables/spitzer_2MASS_fp_psc_download.tbl", format="ipac")
 
     twomass_coords = SkyCoord(twomass["ra"], twomass["dec"], unit="deg", frame="icrs")
 

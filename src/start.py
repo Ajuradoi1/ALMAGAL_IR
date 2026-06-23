@@ -76,15 +76,17 @@ alma_sources.rename_column("n(H2)", "n_H2")
 # Loading scripts
 
 
-if not os.path.isfile("../output/tables/spitzer_sources_" + cat + ".tbl"):
+if not os.path.isfile("../output/tables/spitzer_sources_" + cat + "_download.tbl"):
     print("\ndownloading spitzer catalog...\n")
     spitzer_data(alma_regions_file=alma_file, catalog=cat, type="sources")
+    spitzer_bool = True
 else:
     print("\nthis catalog already exists, skipping download...")
+    spitzer_bool = False
 
 
 spitzer_sources = Table.read(
-    "../output/tables/spitzer_sources_" + cat + ".tbl",
+    "../output/tables/spitzer_sources_" + cat + "_download.tbl",
     format="ipac",
 )
 spitzer_sources = unique(spitzer_sources, keys="designation")
@@ -150,22 +152,45 @@ print("\nfinding matches...\n")
 
 if not os.path.isfile("../output/tables/match_table_" + cat + ".tbl"):
     alma_match_table_fun(
-        alma_regions_file=alma_file, alma_sources_file=alma_sources_file, catalog=cat
+        spitzer_sources=spitzer_sources,alma_regions=alma_regions, alma_sources=alma_sources, catalog=cat
     )
     match_table = Table.read(
         "../output/tables/match_table_" + cat + ".tbl", format="ipac"
     )
     print(f"\n match table generated, {len(match_table)} matches found\n")
+    match_bool = True
 else:
     match_table = Table.read(
         "../output/tables/match_table_" + cat + ".tbl", format="ipac"
     )
     print(f"\nmatch table found, skipping matching... {len(match_table)} matches found")
     print(f"\n{len(set(match_table['region_id']))} ALMA regions have matches\n")
+    match_bool = False
 
 spitzer_sources["has_alma"] = [
     i in (match_table["spitzer_source"]) for i in spitzer_sources["designation"]
 ]
+
+if spitzer_bool:
+    spitzer_sources = join(
+                spitzer_sources,
+                match_table["region_id", "alma_source", "spitzer_source"],
+                keys_left = ['designation'],
+                keys_right = ["spitzer_source"],
+                join_type = "left",
+            )
+
+    spitzer_sources.remove_columns(["spitzer_source"])
+
+alma_regions = join(
+            alma_regions,
+            match_table["region_id", "alma_source", "spitzer_source"],
+            keys_left = ["INTERNAL_ID"],
+            keys_right = ["region_id"],
+            join_type = "left",
+        )
+
+alma_regions.remove_columns(["region_id"])
 
 match_keys_alma = set(zip(match_table["region_id"], match_table["alma_source"]))
 
@@ -173,10 +198,36 @@ alma_sources["HAS_SPITZER"] = [
     (r, s) in match_keys_alma for r, s in zip(alma_sources["CLUMP"], alma_sources["ID"])
 ]
 
+alma_sources = join(
+            alma_sources,
+            match_table["region_id", "alma_source", "spitzer_source"],
+            keys_left = ["CLUMP", "ID"],
+            keys_right = ["region_id", "alma_source"],
+            join_type = "left",
+        )
 
-alma_sources.write(
-    "../output/tables/ALMA_SOURCES_" + cat + ".tbl", format="ascii.ipac", overwrite=True
-)
+alma_sources.remove_columns(["region_id", "alma_source"])
+
+
+if match_bool:
+
+    print('\ngenerating '+cat+' with ALMA matches table...\n')
+
+    spitzer_sources.write(
+        "../output/tables/spitzer_sources_" + cat + ".tbl", format="ascii.ipac", overwrite=True
+    )
+
+    print('\ngenerating alma regions with '+cat+' matches table...\n')
+
+    alma_regions.write(
+        "../output/tables/ALMA_REGIONS_" + cat + ".tbl", format="ascii.ipac", overwrite=True
+    )
+
+    print('\ngenerating alma sources with '+cat+' matches table...\n')
+
+    alma_sources.write(
+        "../output/tables/ALMA_SOURCES_" + cat + ".tbl", format="ascii.ipac", overwrite=True
+    )
 
 if (
     input("Do you want to perform the plots from the match table? (y/n) ").lower()
@@ -207,19 +258,30 @@ else:
 if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
     # We need to add 2MASS data to our spitzer catalog
 
-    if not os.path.isfile("../output/tables/spitzer_sources_" + cat + "_2mass.tbl"):
-        if not os.path.isfile("../output/tables/spitzer_2MASS_fp_psc.tbl"):
-            print("\n2MASS data missing, downloading...")
-            spitzer_data(alma_regions_file=alma_file, catalog="fp_psc", type="2MASS")
 
-        print("\nadding 2mass data to spitzer...")
+    if not os.path.isfile("../output/tables/spitzer_2MASS_fp_psc_download.tbl"):
+        print("\n2MASS data missing, downloading...")
+        spitzer_data(alma_regions_file=alma_file, catalog="fp_psc", type="2MASS")
 
-        spitzer_sources = twomass_to_spitzer(spitzer_sources, cat)
-    else:
-        spitzer_sources = Table.read(
-            "../output/tables/spitzer_sources_" + cat + "_2mass.tbl",
-            format="ascii.ipac",
-        )
+    print("\nadding 2mass data to spitzer...")
+
+    spitzer_sources = twomass_to_spitzer(spitzer_sources, cat)
+    
+
+    cols_spitzer = ['Ak_DECONV', 'Ak_NODEC']
+
+    for col in cols_spitzer:
+        spitzer_sources[col] = 0
+
+    spitzer_sources = join(
+        spitzer_sources,
+        alma_regions['INTERNAL_ID','MASS','LUM','DECONV_SURFD','NODEC_SURFD'],
+        keys_left = ['internal_id_01'],
+        keys_right = ['INTERNAL_ID'],
+        join_type = "left",
+    )
+      
+    spitzer_sources.remove_columns(['INTERNAL_ID'])
 
     if alma_proceeding:
         # SURFD_to_Ak = (1 / (2.8)) * (6.022 * 1e23) * (1 / (8.4 * 1e21))
@@ -232,7 +294,7 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
             * 6.022e23  # Avogadro's constant (N_A) [particles/mol]
             / 2.016  # molecular mass of n(H2) [g/mol]
         )
-        # Build fast lookups
+        '''# Build fast lookups
         deconv_lookup = dict(
             zip(alma_regions["INTERNAL_ID"], alma_regions["DECONV_SURFD"])
         )
@@ -288,30 +350,41 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
                 nodec_lookup.get(region, np.nan)
                 for region in spitzer_sources["internal_id_01"]
             ]
+        )'''
+
+        spitzer_sources = join(
+            spitzer_sources,
+            alma_sources['spitzer_source','Mclump','Lclump'][alma_sources['HAS_SPITZER']],
+            keys_left = ['designation'],
+            keys_right = ['spitzer_source'],
+            join_type = "left",
         )
 
         # Add columns
-        spitzer_sources["Ak_DECONV"] = mask_DECONV * SURFD_to_Ak
-        spitzer_sources["Ak_NODEC"] = mask_NODEC * SURFD_to_Ak
+        spitzer_sources["Ak_DECONV"] = spitzer_sources['DECONV_SURFD'] * SURFD_to_Ak
+        spitzer_sources["Ak_NODEC"] = spitzer_sources['NODEC_SURFD'] * SURFD_to_Ak
         mean_ak_nodec = np.mean(
             spitzer_sources["Ak_NODEC"][
-                spitzer_sources["Ak_NODEC"] != -999 * SURFD_to_Ak
+                spitzer_sources["Ak_NODEC"] != 0
             ]
         )
         mean_ak_deconv = np.mean(
             spitzer_sources["Ak_DECONV"][
-                spitzer_sources["Ak_DECONV"] != -999 * SURFD_to_Ak
+                spitzer_sources["Ak_DECONV"] != 0
             ]
         )
 
         for source in spitzer_sources:
-            if source["Ak_NODEC"] == -999 * SURFD_to_Ak:
+            if source["Ak_NODEC"] == 0:
                 source["Ak_NODEC"] = mean_ak_nodec
-            if source["Ak_DECONV"] == -999 * SURFD_to_Ak:
+            if source["Ak_DECONV"] == 0:
                 source["Ak_DECONV"] = mean_ak_deconv
 
-        '''fig = plt.figure(figsize=(4, 6), tight_layout=True)
+        #remove columns
+        spitzer_sources.remove_columns(["spitzer_source",'DECONV_SURFD', 'NODEC_SURFD'])
 
+        fig = plt.figure(figsize=(4, 5), tight_layout=True)
+        fig.subplots_adjust(bottom=0.25)
         plt.hist(
             spitzer_sources["Ak_NODEC"],
             bins=range(0, 125, 5),
@@ -375,9 +448,9 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
         plt.xlabel("Ak")
         plt.xlim([0, 125])
         plt.legend()
-        plt.savefig("../output/figures/Ak_histogram_" + cat_name + ".pdf", format="pdf")'''
+        plt.savefig("../output/figures/Ak_histogram_" + cat_name + ".pdf", format="pdf")
 
-        fig, axs = plt.subplots(2, 1, figsize=(6, 6), sharex=True, tight_layout=True)
+        '''fig, axs = plt.subplots(2, 1, figsize=(6, 6), sharex=True, tight_layout=True)
 
         axs[0].hist(
             spitzer_sources["Ak_NODEC"],
@@ -408,10 +481,8 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
             stacked=True,
             label=r"$d > 3700$ pc",
         )
-        axs[0].legend(True)
-        axs[1].legend(True)
 
-        fig.savefig("../output/figures/Ak_histogram_" + cat_name + ".pdf", format="pdf")
+        fig.savefig("../output/figures/Ak_histogram_" + cat_name + ".pdf", format="pdf")'''
 
     else:
         # Ak values are not available for sources without ALMA matches, so we will take zero as a placeholder for the Ak values in the YSO classification. This is not ideal, but it allows us to proceed with the classification for sources without ALMA matches.
@@ -443,11 +514,25 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
         )
         print("\nphase II completed")
 
+        spitzer_sources.write('../output/tables/spitzer_sources_YSO_PLOTS_ALMA.tbl', format='ascii.ipac', overwrite=True)
+
+        alma_sources.write('../output/tables/alma_sources_YSO_PLOTS_ALMA.tbl', format='ascii.ipac', overwrite=True)
+
+        alma_regions.write('../output/tables/alma_regions_YSO_PLOTS_ALMA.tbl', format='ascii.ipac', overwrite=True)
+
     else:
+        
         print("\nphase II is not implemented for sources without ALMA matches")
 
+        spitzer_sources.write('../output/tables/spitzer_sources_YSO_PLOTS.tbl', format='ascii.ipac', overwrite=True)
+
+        alma_sources.write('../output/tables/alma_sources_YSO_PLOTS.tbl', format='ascii.ipac', overwrite=True)
+
+        alma_regions.write('../output/tables/alma_regions_YSO_PLOTS.tbl', format='ascii.ipac', overwrite=True)
 else:
     print("\nanalysis finished.")
+
+
 
 
 # YSO_plots(spitzer_sources, alma_proceeding, cat)

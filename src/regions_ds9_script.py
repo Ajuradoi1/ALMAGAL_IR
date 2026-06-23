@@ -15,7 +15,7 @@ def regions_ds9(alma_regions_file: str, alma_sources_file: str, catalog: str):
     # print("\n\n\n")
 
     spitzer_sources = Table.read(
-        "../output/tables/spitzer_sources_" + catalog + ".tbl", format="ascii.ipac"
+        "../output/tables/spitzer_sources_" + catalog + "_download.tbl", format="ascii.ipac"
     )
     # print(spitzer_sources[:2])
     # print("\n\n\n")
