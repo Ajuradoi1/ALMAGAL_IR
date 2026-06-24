@@ -183,7 +183,7 @@ def plot_separation_histogram(match_table, bin_width, catalog):
     plt.axvline(0.25, color="red", linestyle="-", label="ALMA Resolution (0.25 arcsec)")
 
     plt.grid(axis="y", alpha=0.75)
-    plt.savefig("../output/figures/match_" + catalog + "_hist.pdf", format="pdf")
+    plt.savefig("../output/figures/"+catalog+"/match_" + catalog + "_hist.pdf", format="pdf")
 
 
 def plot_source_matches_all(match_table, catalog):
@@ -219,7 +219,7 @@ def plot_source_matches_all(match_table, catalog):
             color="blue",
             alpha=0.5,
         )
-    plt.savefig("../output/figures/match_" + catalog + "_plot.pdf", format="pdf")
+    plt.savefig("../output/figures/"+catalog+"/match_" + catalog + "_plot.pdf", format="pdf")
 
 
 def plot_match_heatmap(match_table, catalog: str):
@@ -284,4 +284,4 @@ def plot_match_heatmap(match_table, catalog: str):
     # ax.set_title("Distribution of Spitzer sources around ALMA sources")
 
     fig.colorbar(im, ax=ax, label="Density")
-    fig.savefig("../output/figures/match_" + catalog + "_heatmap.pdf", format="pdf")
+    fig.savefig("../output/figures/"+catalog+"/match_" + catalog + "_heatmap.pdf", format="pdf")

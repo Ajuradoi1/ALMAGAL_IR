@@ -185,7 +185,7 @@ def YSO_Phase_I(spitzer_sources, cat):
 
     plt.tight_layout()
     plt.savefig(
-        "../output/figures/YSO_phase_I_pah_galaxies_" + cat + ".pdf", format="pdf"
+        "../output/figures/"+cat+"/YSO_phase_I_pah_galaxies_" + cat + ".pdf", format="pdf"
     )
 
     # MARK: AGN
@@ -310,7 +310,7 @@ def YSO_Phase_I(spitzer_sources, cat):
     ax.set_ylim([4, 18])
     ax.yaxis.set_inverted(True)
     plt.tight_layout()
-    plt.savefig("../output/figures/YSO_phase_I_AGN_" + cat + ".pdf", format="pdf")
+    plt.savefig("../output/figures/"+cat+"/YSO_phase_I_AGN_" + cat + ".pdf", format="pdf")
 
     # MARK: SED SOURCES
 
@@ -520,7 +520,7 @@ def YSO_Phase_I(spitzer_sources, cat):
     ax[1].set_xlabel("[4.5] - [5.8]")
     ax[1].set_ylabel("[3.6] - [4.5]")
 
-    plt.savefig("../output/figures/YSO_phase_I_SED_PAH_" + cat + ".pdf", format="pdf")
+    plt.savefig("../output/figures/"+cat+"/YSO_phase_I_SED_PAH_" + cat + ".pdf", format="pdf")
 
     # MARK: Class II
 
@@ -608,7 +608,7 @@ def YSO_Phase_I(spitzer_sources, cat):
 
     ax.text(4, 1, "Class II")
 
-    plt.savefig("../output/figures/YSO_phase_I_class_II_" + cat + ".pdf", format="pdf")
+    plt.savefig("../output/figures/"+cat+"/YSO_phase_I_class_II_" + cat + ".pdf", format="pdf")
 
     # return class_I, class_II, phase_I
 
@@ -660,9 +660,9 @@ def YSO_Phase_II(spitzer_sources, cat):
 
     no_class = phase_II.copy()
 
-    no_class.write(
+    '''no_class.write(
         "../output/tables/phase_II_" + cat + ".tbl", format="ascii.ipac", overwrite=True
-    )
+    )'''
 
     EJH_HK = 1.73
 
@@ -826,7 +826,7 @@ def YSO_Phase_II(spitzer_sources, cat):
     )
     ax[1].plot(x[cut_idx:], 1.33 * x[cut_idx:] + 0.133, color="black", linestyle="--")
 
-    fig.savefig("../output/figures/YSO_phase_II_fig17_" + cat + ".pdf", format="pdf")
+    fig.savefig("../output/figures/"+cat+"/YSO_phase_II_fig17_" + cat + ".pdf", format="pdf")
 
     # MARK: FIG 17b DE-REDDENING
 
@@ -912,7 +912,7 @@ def YSO_Phase_II(spitzer_sources, cat):
     ax[1].set_xlim(xmin, xmax)
 
     fig.savefig(
-        "../output/figures/YSO_Phase_II_fig17_comp_" + cat + ".pdf", format="pdf"
+        "../output/figures/"+cat+"/YSO_Phase_II_fig17_comp_" + cat + ".pdf", format="pdf"
     )
 
     # MARK: CLASS I/II
@@ -1005,6 +1005,6 @@ def YSO_Phase_II(spitzer_sources, cat):
 
     plt.tight_layout()
 
-    fig.savefig("../output/figures/YSO_phase_II_CC_" + cat + ".pdf", format="pdf")
+    fig.savefig("../output/figures/"+cat+"/YSO_phase_II_CC_" + cat + ".pdf", format="pdf")
 
     return spitzer_sources

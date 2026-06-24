@@ -26,7 +26,7 @@ def twomass_to_spitzer(spitzer_sources, cat):
         spitzer_sources[col][mask] = np.array(twomass[col][idx[mask]], dtype=float)
 
     spitzer_sources.write(
-        "../output/tables/spitzer_sources_" + cat + "_2mass.tbl",
+        "../output/tables/"+cat+"/spitzer_sources_" + cat + "_2mass.tbl",
         format="ascii.ipac",
         overwrite=True,
     )

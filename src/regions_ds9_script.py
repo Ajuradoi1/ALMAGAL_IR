@@ -10,7 +10,7 @@ def regions_ds9(alma_regions_file: str, alma_sources_file: str, catalog: str):
 
 
     spitzer_sources = Table.read(
-        "../output/tables/spitzer_sources_" + catalog + "_download.tbl", format="ascii.ipac"
+        "../output/tables/"+catalog+"/spitzer_sources_" + catalog + "_download.tbl", format="ascii.ipac"
     )
 
     alma_sources = pd.read_csv(

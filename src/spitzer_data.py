@@ -15,6 +15,7 @@ def spitzer_data(alma_regions_file: str, catalog: str, type: str):
 
     os.makedirs("../output", exist_ok=True)
     os.makedirs("../output/tables", exist_ok=True)
+    
 
     if not os.path.isfile("../output/tables/alma_regions_coordinates.tbl"):
         print("\ngenerating coordinates file...\n")
@@ -41,6 +42,7 @@ def spitzer_data(alma_regions_file: str, catalog: str, type: str):
     data = {"catalog": catalog, "spatial": "Upload", "uradius": 60, "outfmt": 1}
 
     response = requests.post(url, files=file, data=data)
+
     if (
         response.text.split(" list")[0]
         == '[struct stat="ERROR", msg="The catalog is not on the'
@@ -48,7 +50,20 @@ def spitzer_data(alma_regions_file: str, catalog: str, type: str):
         print("invalid catalog name, please use a spitzer one.\n")
         exit()
     else:
-        with open(f"../output/tables/spitzer_{type}_{catalog}_download.tbl", "w") as f:
-            f.write(response.text)
+        
+        if catalog != 'fp_psc':
+            
+            os.makedirs("../output/tables/"+catalog, exist_ok=True)
+            os.makedirs("../output/figures", exist_ok=True)
+            os.makedirs("../output/figures/"+catalog, exist_ok=True)
 
-            print("done!\n")
+            with open("../output/tables/"+catalog+f"/spitzer_{type}_{catalog}_download.tbl", "w") as f:
+                f.write(response.text)
+
+                print("done!\n")
+        else:
+            
+            with open(f"../output/tables/spitzer_{type}_{catalog}_download.tbl", "w") as f:
+                f.write(response.text)
+
+                print("done!\n")
