@@ -132,7 +132,8 @@ spitzer_sources["has_alma"] = [
     i in (match_table["spitzer_source"]) for i in spitzer_sources["designation"]
 ]
 
-if spitzer_bool:
+#if spitzer_bool:
+if True:
     spitzer_sources = join(
                 spitzer_sources,
                 match_table["region_id", "alma_source", "spitzer_source"],
@@ -141,9 +142,13 @@ if spitzer_bool:
                 join_type = "left",
             )
 
-    spitzer_sources.remove_columns(["spitzer_source"])
+    spitzer_sources.remove_columns(["region_id","spitzer_source"])
 
-alma_regions = join(
+alma_regions["HAS_SPITZER"] = [
+    r in match_table['region_id'] for r in alma_regions['INTERNAL_ID']
+]
+
+'''alma_regions = join(
             alma_regions,
             match_table["region_id", "alma_source", "spitzer_source"],
             keys_left = ["INTERNAL_ID"],
@@ -151,7 +156,7 @@ alma_regions = join(
             join_type = "left",
         )
 
-alma_regions.remove_columns(["region_id"])
+alma_regions.remove_columns(["region_id"])'''
 
 match_keys_alma = set(zip(match_table["region_id"], match_table["alma_source"]))
 
@@ -261,6 +266,9 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
             keys_right = ['spitzer_source'],
             join_type = "left",
         )
+        
+        spitzer_sources.remove_columns(["spitzer_source"])
+
 
     # Add columns
     spitzer_sources["Ak_DECONV"] = spitzer_sources['DECONV_SURFD'] * SURFD_to_Ak
@@ -282,8 +290,7 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
         if source["Ak_DECONV"] == 0:
             source["Ak_DECONV"] = mean_ak_deconv
 
-    #remove columns
-    spitzer_sources.remove_columns(["spitzer_source"])
+    # Plot Ak hist
 
     fig = plt.figure(figsize=(4, 5), tight_layout=True)
     fig.subplots_adjust(bottom=0.25)
@@ -337,6 +344,32 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
         )
         print("\nphase II completed")
 
+
+        alma_sources = join(alma_sources,
+                            spitzer_sources["internal_id_01",
+                                            "alma_source",
+                                            "designation",
+                                            "pah_galaxies",
+                                            "agn_sources",
+                                            "sed_sources",
+                                            "pah_contaminated",
+                                            "p1_class_I",
+                                            "p1_class_II",
+                                            "p1_noclass",
+                                            "p2_class_I",
+                                            "p2_class_II",
+                                            "p2_noclass"],
+                            keys_left = ['CLUMP','ID'],
+                            keys_right= ['internal_id_01','alma_source'],
+                            join_type='left'
+                            )
+
+
+        
+
+        alma_sources.remove_columns(['internal_id_01','alma_source'])
+
+
         spitzer_sources.write('../output/tables/'+cat+'/spitzer_sources_YSO_PLOTS_ALMA.tbl', format='ascii.ipac', overwrite=True)
 
         alma_sources.write('../output/tables/'+cat+'/alma_sources_YSO_PLOTS_ALMA.tbl', format='ascii.ipac', overwrite=True)
@@ -350,8 +383,38 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
         format="ascii.ipac",
         overwrite=True,
         )
-        
+
         print("\nphase II is not implemented for sources without ALMA matches")
+
+        alma_sources_join = join(alma_sources['CLUMP','ID'][alma_sources['HAS_SPITZER']],
+                            spitzer_sources["internal_id_01",
+                                            "alma_source",
+                                            "designation",
+                                            "pah_galaxies",
+                                            "agn_sources",
+                                            "sed_sources",
+                                            "pah_contaminated",
+                                            "p1_class_I",
+                                            "p1_class_II",
+                                            "p1_noclass"][spitzer_sources['has_alma']],
+                            keys_left = ['CLUMP','ID'],
+                            keys_right= ['internal_id_01','alma_source'],
+                            join_type='left'
+                            )
+        alma_sources_join.rename_column('CLUMP','CLUMP_join')
+        alma_sources_join.rename_column('ID','ID_join')
+
+        alma_sources = join(
+            alma_sources,
+            alma_sources_join,
+            keys_left = ['CLUMP','ID'],
+            keys_right = ['CLUMP_join','ID_join'],
+            join_type='left'
+        )
+
+        alma_sources.remove_columns(['CLUMP_join','ID_join'])
+
+        alma_sources.remove_columns(['internal_id_01','alma_source'])
 
         spitzer_sources.write('../output/tables/'+cat+'/spitzer_sources_YSO_PLOTS.tbl', format='ascii.ipac', overwrite=True)
 
