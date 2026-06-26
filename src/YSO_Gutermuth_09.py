@@ -647,7 +647,7 @@ def YSO_Phase_II(spitzer_sources, cat):
     phase_II = spitzer_sources.copy()
 
     good = (
-        (~phase_II["mag5_8"].mask | ~phase_II["mag8_0"].mask)
+        (~phase_II["mag5_8"].mask != ~phase_II["mag8_0"].mask) # CHANGE 25/06/2026
         & ~np.isnan(phase_II["h_msigcom"])
         & ~np.isnan(phase_II["k_msigcom"])
         & ~phase_II["color36_45"].mask

@@ -261,7 +261,7 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
 
         spitzer_sources = join(
             spitzer_sources,
-            alma_sources['spitzer_source','Mclump','Lclump','Lclump_Mclump'][alma_sources['HAS_SPITZER']],
+            alma_sources['spitzer_source','Mclump','Lclump','Lclump_Mclump','RADIO_MATCH'][alma_sources['HAS_SPITZER']],
             keys_left = ['designation'],
             keys_right = ['spitzer_source'],
             join_type = "left",
@@ -370,11 +370,11 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
         alma_sources.remove_columns(['internal_id_01','alma_source'])
 
 
-        spitzer_sources.write('../output/tables/'+cat+'/spitzer_sources_YSO_PLOTS_ALMA.tbl', format='ascii.ipac', overwrite=True)
+        spitzer_sources.write('../output/tables/'+cat+'/spitzer_sources_to_analyze_ALMA.tbl', format='ascii.ipac', overwrite=True)
 
-        alma_sources.write('../output/tables/'+cat+'/alma_sources_YSO_PLOTS_ALMA.tbl', format='ascii.ipac', overwrite=True)
+        alma_sources.write('../output/tables/'+cat+'/alma_sources_to_analyze_ALMA.tbl', format='ascii.ipac', overwrite=True)
 
-        alma_regions.write('../output/tables/'+cat+'/alma_regions_YSO_PLOTS_ALMA.tbl', format='ascii.ipac', overwrite=True)
+        alma_regions.write('../output/tables/'+cat+'/alma_regions_to_analyze_ALMA.tbl', format='ascii.ipac', overwrite=True)
 
     else:
 
@@ -416,11 +416,11 @@ if input("Do you want to perform a YSO classification? (y/n) ").lower() == "y":
 
         alma_sources.remove_columns(['internal_id_01','alma_source'])
 
-        spitzer_sources.write('../output/tables/'+cat+'/spitzer_sources_YSO_PLOTS.tbl', format='ascii.ipac', overwrite=True)
+        spitzer_sources.write('../output/tables/'+cat+'/spitzer_sources_to_analyze.tbl', format='ascii.ipac', overwrite=True)
 
-        alma_sources.write('../output/tables/'+cat+'/alma_sources_YSO_PLOTS.tbl', format='ascii.ipac', overwrite=True)
+        alma_sources.write('../output/tables/'+cat+'/alma_sources_to_analyze.tbl', format='ascii.ipac', overwrite=True)
 
-        alma_regions.write('../output/tables/'+cat+'/alma_regions_YSO_PLOTS.tbl', format='ascii.ipac', overwrite=True)
+        alma_regions.write('../output/tables/'+cat+'/alma_regions_to_analyze.tbl', format='ascii.ipac', overwrite=True)
 else:
     print("\nanalysis finished.")
 
