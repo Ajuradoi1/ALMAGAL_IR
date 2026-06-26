@@ -108,19 +108,21 @@ def region_analyze(spitzer_sources,spitzer_sources_alma,alma_regions,alma_source
 
     count_dict = {}
 
-    for idx,region in enumerate(alma_regions):
+    '''for idx,region in enumerate(alma_regions):
         
-        count_total = 0
-        count_YSO = 0
-        for col in cols:
-            count_total = count_total + region[col]
-            if col in ['p1_class_I','p1_class_II','p2_class_I','p2_class_II']:
-                count_YSO = count_YSO + region[col]
+        count_60 = 0
+        count_20 = 0
+        for col in [['class_I_60','class_II_60']],:
+            count_60 = count_60 + region[col[0]]+region[col[1]]
         
-        count_dict[idx] = [region['INTERNAL_ID'],count_total,count_YSO]
+        for col in [['class_I_20','class_II_20']]:
+                count_20 = count_20 + region[col[0]]+region[col[1]]'''
     
+    count_60 = np.array(alma_regions['class_I_60'])+np.array(alma_regions['class_I_60'])
+    count_20 = np.array(alma_regions['class_I_20'])+np.array(alma_regions['class_II_20'])
 
-    total_tol = sorted(count_dict.items(),key=lambda item: item[1][1],reverse=True)
+
+    '''total_tol = sorted(count_dict.items(),key=lambda item: item[1][1],reverse=True)
     total_YSO = sorted(count_dict.items(),key=lambda item: item[1][2],reverse=True)
 
     total_id = []
@@ -131,13 +133,28 @@ def region_analyze(spitzer_sources,spitzer_sources_alma,alma_regions,alma_source
     for element in total_YSO:
         yso_id.append(element[1][0])
 
+    '''
 
+    tbl = Table()
+
+    tbl['region_id'] = alma_regions['INTERNAL_ID']
+    tbl['class_60'] = count_60
+    tbl['class_20'] = count_20
+    
     #print(f'Region with most sources: {total_id[0]}\n')
     #print(f'Region with most YSO matched: {yso_id[0]}\n')
 
-    
+    tbl1 = tbl.copy()
 
-    return alma_regions, total_id, yso_id
+    tbl1.sort('class_60')
+    tbl1.reverse()
+
+    tbl2 = tbl.copy()
+
+    tbl2.sort('class_20')
+    tbl2.reverse()
+
+    return alma_regions, np.array(tbl1['region_id']), np.array(tbl2['region_id'])
 
 
 def YSO_plots_compare(spitzer_sources,alma_regions,spitzer_sources_alma,cat):
@@ -495,8 +512,11 @@ def region_plot(spitzer_sources,alma_sources,alma_sources_alma,cat,region,region
                             counter[2] = counter[2] +1 
                 elif idx2 == 1:
                     for source in table:
-                        axs[i].scatter(table['GLON']*u.deg-center[0],table['GLAT']*u.deg-center[1],color='lightgrey',marker='o',s=20,zorder=0)
-                        counter[6] = counter[6] +1
+                        if (source['HAS_SPITZER'] =='False') and (source['RADIO_MATCH'] == 0):
+                            axs[i].scatter(table['GLON']*u.deg-center[0],table['GLAT']*u.deg-center[1],color='green',marker='o',s=15,zorder=0)
+                            counter[6] = counter[6] +1
+                        elif (source['HAS_SPITZER'] == 'False') and (source['RADIO_MATCH'] == 1):
+                            axs[i].scatter(table['GLON']*u.deg-center[0],table['GLAT']*u.deg-center[1],color='green',marker='^',s=15,zorder=0)
                 else:
                     for source in table:
                         if ((source['p1_class_I'] == 'True') or (source['p2_class_I'] == 'True')):
@@ -511,12 +531,6 @@ def region_plot(spitzer_sources,alma_sources,alma_sources_alma,cat,region,region
                         
         for i in range(len(counter)):
             counter[i] = int(counter[i] / 2)
-
-        '''print('\n')
-        for idx2,name in enumerate(['spitzer class I', 'spitzer class II', 'spitzer no class', 'match class I', 'match class II', 'match no class','almagal source']):
-            print(f'{name}: {counter[idx2]}')
-                    
-        print('\n')'''
 
     class_I_bol, class_II_bol, false_dist = False, False, False
 
@@ -539,29 +553,118 @@ def region_plot(spitzer_sources,alma_sources,alma_sources_alma,cat,region,region
         centroid_total = Point(0,0)
         false_dist = True
     
+    dist_class_I,dist_class_II = [],[]
     if not false_dist:
         for i in range(2):
             axs[i].scatter(centroid_total.x,centroid_total.y,color='magenta',marker='D',s=30)
             axs[i].plot([centroid_total.x,0],[centroid_total.y,0],color='magenta',linestyle='--',alpha=0.5)
-
-        
-        dist_class_I,dist_class_II = [], []
-        count_class_I,count_class_II = 0, 0
         
         for source in spitzer_sources:
-            pit_dist = np.sqrt((centroid_total.x-source['l'])**2+(centroid_total.y-source['b'])**2)
+            pit_dist = np.sqrt((centroid_total.x-(source['l']*u.deg-center[0]).value)**2+(centroid_total.y-(source['b']*u.deg-center[1]).value)**2)
 
-            if source['p1_class_I']:
+            if source['p1_class_I'] == 'True':
                 dist_class_I.append(pit_dist)
-            elif source['p1_class_II']:
+            elif source['p1_class_II'] == 'True':
                 dist_class_II.append(pit_dist)
 
-        dist_spitzer = [np.mean(np.array(dist_class_I)),np.mean(np.array(dist_class_II))]
-    else:
-        dist_spitzer = [-999,-999]
 
-    #print('\n')
-    #print(f'distance to centroid: {dist} [deg]')
+        if len(dist_class_I) != 0:
+            dist_class_I_np = np.mean(np.array(dist_class_I))
+
+        if len(dist_class_II) != 0:
+            dist_class_II_np = np.mean(np.array(dist_class_II))
+
+        if len(dist_class_I) == 0:
+            dist_class_I = -999
+        else:
+            dist_class_I = dist_class_I_np
+
+        if len(dist_class_II) == 0:
+            dist_class_II = -999
+        else:
+            dist_class_II = dist_class_II_np 
+          
+           
+
+
+    else:
+        dist_class_I,dist_class_II  = [-999,-999]
+
+
+    dist_class_0,dist_radio = [],[]
+    dist_class_I_alma,dist_class_II_alma = [],[]
+
+    counter_class_0 = 0
+    counter_radio = 0
+    counter_class_I_alma = 0
+    counter_class_II_alma = 0
+
+
+    if not false_dist:
+        for i,sources in enumerate([alma_sources,alma_sources_alma]):
+            for source in sources:
+                pit_dist = np.sqrt((centroid_total.x-(source['GLON']*u.deg-center[0]).value)**2+(centroid_total.y-(source['GLAT']*u.deg-center[1]).value)**2)
+                
+                if i == 0:
+                    
+                    if source['HAS_SPITZER'] == 'False':
+                        if source['RADIO_MATCH'] == 0 :
+                            dist_class_0.append(pit_dist)
+                            counter_class_0 = counter_class_0 +1
+                        else:
+                            dist_radio.append(pit_dist)
+                            counter_radio = counter_radio +1
+
+                else:
+                    if ((source['p1_class_I'] == 'True') or (source['p2_class_I'] == 'True')):
+                        
+                        dist_class_I_alma.append(pit_dist)
+                        counter_class_I_alma = counter_class_I_alma + 1
+
+                    elif (source['p1_class_II'] == 'True') or (source['p2_class_II'] == 'True'):
+                        
+                        dist_class_II_alma.append(pit_dist)
+                        counter_class_II_alma = counter_class_II_alma + 1 
+
+
+
+        if len(dist_class_0) != 0:
+            dist_class_0_np = np.mean(np.array(dist_class_0))
+
+        if len(dist_radio) != 0:
+            dist_radio_np = np.mean(np.array(dist_radio))
+
+        if len(dist_class_I_alma) != 0:
+            dist_class_I_alma_np = np.mean(np.array(dist_class_I_alma))
+
+        if len(dist_class_II_alma) != 0:
+            dist_class_II_np = np.mean(np.array(dist_class_II_alma))
+
+        if len(dist_class_0) == 0:
+            dist_class_0 = -999
+        else:
+            dist_class_0 = dist_class_0_np
+
+        if len(dist_radio) == 0:
+            dist_radio = -999
+        else:
+            dist_radio = dist_radio_np
+
+        if len(dist_class_I_alma) == 0:
+            dist_class_I_alma = -999
+        else:
+            dist_class_I_alma = dist_class_I_alma_np 
+        
+        if len(dist_class_II_alma) == 0:
+            dist_class_II_alma = -999
+        else:
+            dist_class_II_alma = dist_class_II_np 
+          
+    else:
+        dist_class_0,dist_radio  = [-999,-999]    
+        dist_class_I_alma,dist_class_I_alma = [-999,-999]
+    
+
 
     axs[0].indicate_inset_zoom(axs[1],edgecolor='red')
     fig.suptitle(f'Region {region}',y=0.72)
@@ -575,9 +678,8 @@ def region_plot(spitzer_sources,alma_sources,alma_sources_alma,cat,region,region
     else:
         fig.savefig('../output/figures/'+cat+'/regions/spitzer/'+str(int(idx)+1)+'_'+region+'_spitzer.pdf',format='pdf',dpi=300,bbox_inches='tight')
         plt.close()
-    
-    
-    return [dist_class_I,dist_class_II,counter[3],counter[4],false_dist]
+
+    return [[dist_class_I,dist_class_II,dist_class_0,dist_radio,dist_class_I_alma,dist_class_II_alma],[len(class_I),len(class_II),counter_class_0,counter_radio,counter_class_I_alma,counter_class_II_alma],false_dist]
 
 
 
