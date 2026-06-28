@@ -1,7 +1,7 @@
 # ALMAGAL_IR analyzer. Need to run ALMAGAL_IR for tables needed to run. 2 runs needed. 1 ALMA data and other 1 SPITZER
 
 from astropy.table import Table
-from YSO_statistics import YSO_plots_compare, region_analyze, region_plot
+from YSO_statistics import YSO_plots_compare, region_analyze, region_plot, distribution_plots
 import numpy as np
 from matplotlib import pyplot as plt 
 
@@ -38,6 +38,8 @@ if input('do you want to plot histogram of sources, L/M, n(H2) plots? (y/n) ').l
 
     print('\n\ngenerating plots...\n\n')
     YSO_plots_compare(spitzer_sources,alma_regions,spitzer_sources_alma,cat)
+
+skip = False
 
 if input('do you want to plot the regions distribution? (y/n) ').lower() == 'y':
 
@@ -142,46 +144,21 @@ if input('do you want to plot the regions distribution? (y/n) ').lower() == 'y':
         
 
 
-
-"""if input('do you want to plot centroid distance vs YSO? (y/n) ').lower() == 'y':
-
-    labels = ['Class I', 'Class II']
-    tbl = Table.read('../output/tables/'+cat+'/'+str(n_regions)+'_distance_'+str(mode)+'.tbl',format='ascii.ipac')
-    tbl = tbl[tbl['false_dist'] == 'False']
-
-    for idx,data in enumerate([['dist_class_I','class_I'],['dist_class_II','class_II']]):
-        fig, axs = plt.subplots(2,2,figsize=(3,3),gridspec_kw={
-            'width_ratios': [4, 1],
-            'height_ratios': [1, 4]
-        })
-
-        axs[0][1].axis('off')
-        axs[1][0].hist2d(tbl[data[idx][0]]*3600,tbl[data[idx][1]],cmap='plasma')
-
-        axs[0][0].hist(tbl[data[idx][0]]*3600)
-        axs[1][1].hist(tbl[data[idx][1]],orientation='horizontal')
-
-
-        '''axs[0][0].set_xlim([0,40])
-        axs[0][0].set_ylim([0,12])
-        axs[1][1].set_ylim([0,4])
-        axs[1][1].set_xlim([0,50])
-
-        axs[1][0].set_xlim([0,40])
-        axs[1][0].set_ylim([0,4])'''
-
-        '''counts, _ = np.histogram(tbl['class_I']+tbl['class_II'],bins=range(0,np.max(tbl['class_I']+tbl['class_II'])+1,1))
-
-        '''
-        axs[1][0].set_xlabel('distance from centroid [arcsec]')
-        axs[1][0].set_ylabel(labels[idx]+' YSO detected (matched data)')
-
-        axs[0][0].tick_params(axis='x', bottom=False, labelbottom=False)
-        axs[1][1].tick_params(axis='y', left=False, labelleft=False)
-        axs[1][1].tick_params(axis='y', which='minor',left=False, labelleft=False)
-
-        fig.savefig('../output/figures/'+cat+'/'+data[idx][1]+'_distance_YSO.pdf',format='pdf',dpi=300)
-        plt.close()
+    skip = True
+    if input('do you want to plot centroid distance vs YSO? (y/n) ').lower() == 'y':
+        
+        distribution_plots(n_regions,mode,cat)
     
-"""
+if not skip:
+    if input('do you want to plot centroid distance vs YSO? (y/n) ').lower() == 'y':
+        
+        print('(required file: (n_regions)_distance_(mode).tbl)' )
+        n_regions = input('number of regions? (max 1017) ').lower()
+
+        mode = '0'
+        while (mode != 'match' and mode!= 'total'): 
+            mode = input('choose sort (match/total): ').lower()
+
+        distribution_plots(n_regions,mode,cat)
+
 
