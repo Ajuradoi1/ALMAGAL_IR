@@ -1,4 +1,7 @@
-# ALMAGAL_IR analyzer. Need to run ALMAGAL_IR for tables needed to run. 2 runs needed. 1 ALMA data and other 1 SPITZER
+# ALMAGAL_IR_PLOT. Need to run ALMAGAL_IR_YSO for tables needed to run. 2 runs needed. 1 ALMA data and other 1 SPITZER
+# Author: Álex Jurado i López
+# github repo: https://github.com/Ajuradoi1/ALMAGAL_IR
+
 
 from astropy.table import Table
 from YSO_statistics import YSO_plots_compare, region_analyze, region_plot, distribution_plots

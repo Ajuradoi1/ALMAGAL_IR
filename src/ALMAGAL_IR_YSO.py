@@ -1,6 +1,6 @@
 # ALMAGAL Source analyzer -- Spitzer analyzer
 # Author: Álex Jurado i López
-# github repo: https://github.com/Ajuradoi1/TFM-ALMA
+# github repo: https://github.com/Ajuradoi1/ALMAGAL_IR
 
 # Execute the script giving <spitzer_catalog> <alma_regions_file>(opt) <alma_source_file>(opt)
 

@@ -32,11 +32,10 @@ def region_analyze(spitzer_sources,spitzer_sources_alma,alma_regions,alma_source
     ratio_20_class_II = []
     ratio_20_radio = []
 
-    count_debug = 0
     for col in cols:
         alma_regions[col] = 0
     
-    for idx, region in enumerate(alma_regions):
+    for  region in alma_regions:
         region_id = region['INTERNAL_ID']
 
         count_60_class_I.append(0)
@@ -60,8 +59,6 @@ def region_analyze(spitzer_sources,spitzer_sources_alma,alma_regions,alma_source
         # Compute % of Class I and Class II for 60'' (Total spitzer data)
 
         aux_val = (count_60_class_I[-1]+count_60_class_II[-1])
-
-        
 
         if aux_val != 0:
 
@@ -105,35 +102,9 @@ def region_analyze(spitzer_sources,spitzer_sources_alma,alma_regions,alma_source
 
 
     alma_regions.write('../output/tables/'+cat+'/alma_regions_YSO.tbl',format='ascii.ipac',overwrite=True)
-
-    count_dict = {}
-
-    '''for idx,region in enumerate(alma_regions):
-        
-        count_60 = 0
-        count_20 = 0
-        for col in [['class_I_60','class_II_60']],:
-            count_60 = count_60 + region[col[0]]+region[col[1]]
-        
-        for col in [['class_I_20','class_II_20']]:
-                count_20 = count_20 + region[col[0]]+region[col[1]]'''
     
     count_60 = np.array(alma_regions['class_I_60'])+np.array(alma_regions['class_I_60'])
     count_20 = np.array(alma_regions['class_I_20'])+np.array(alma_regions['class_II_20'])
-
-
-    '''total_tol = sorted(count_dict.items(),key=lambda item: item[1][1],reverse=True)
-    total_YSO = sorted(count_dict.items(),key=lambda item: item[1][2],reverse=True)
-
-    total_id = []
-    yso_id = []
-
-    for element in total_tol:
-        total_id.append(element[1][0])
-    for element in total_YSO:
-        yso_id.append(element[1][0])
-
-    '''
 
     tbl = Table()
 
@@ -262,7 +233,7 @@ def YSO_plots_compare(spitzer_sources,alma_regions,spitzer_sources_alma,cat):
     plt.close()
     
     # MARK: L/M, L, M, T, DIST, N(H_2)
-
+    #cat = 'glimpse_s07'
     class_I_60 = []
     class_II_60 = []
     class_0_20 = []
@@ -275,12 +246,14 @@ def YSO_plots_compare(spitzer_sources,alma_regions,spitzer_sources_alma,cat):
         6.022e23  # Avogadro's constant (N_A) [particles/mol]
         / 2.016  # molecular mass of n(H2) [g/mol]
     )
+    limits = [[-1.5,2.6],[1,6],[1.5,4],[0.5,13],[7.5,40],[10,100],[22,24]]
 
     for region in alma_regions:
 
         if (
             region['MASS'] == -999 or
             region['LUM'] == -999 or
+            region['TDUST'] == -999 or
             region['TBOL'] == -999 or 
             region['DIST_AG'] == -999 or
             region['NODEC_SURFD'] == -999
@@ -290,21 +263,24 @@ def YSO_plots_compare(spitzer_sources,alma_regions,spitzer_sources_alma,cat):
         L_M = np.log10(region['LUM'] / region['MASS'])
         L = np.log10(region['LUM'])
         M = np.log10(region['MASS'])
-        dist = np.log10(region['DIST_AG'])
-        T = np.log10(region['TBOL'])
+        dist = np.array(region['DIST_AG']) / 1000
+        TDUST = np.array(region['TDUST'])
+        TBOL = np.array(region['TBOL'])
         NH_2 = np.log10(region['NODEC_SURFD']*SURFD_to_nH2)
 
 
-        class_I_60.append([L_M,L,M,dist,T,NH_2, region['rat_class_I_60']*100])
-        class_II_60.append([L_M,L,M,dist,T,NH_2, region['rat_class_II_60']*100])
-        class_0_20.append([L_M,L,M,dist,T,NH_2, region['rat_class_0_20']*100])
-        class_I_20.append([L_M,L,M,dist,T,NH_2, region['rat_class_I_20']*100])
-        class_II_20.append([L_M,L,M,dist,T,NH_2, region['rat_class_II_20']*100])
-        radio_20.append([L_M,L,M,dist,T,NH_2, region['rat_radio_20']*100])
+        class_I_60.append([L_M,L,M,dist,TDUST,TBOL,NH_2, region['rat_class_I_60']*100])
+        class_II_60.append([L_M,L,M,dist,TDUST,TBOL,NH_2, region['rat_class_II_60']*100])
+        class_0_20.append([L_M,L,M,dist,TDUST,TBOL,NH_2, region['rat_class_0_20']*100])
+        class_I_20.append([L_M,L,M,dist,TDUST,TBOL,NH_2, region['rat_class_I_20']*100])
+        class_II_20.append([L_M,L,M,dist,TDUST,TBOL,NH_2, region['rat_class_II_20']*100])
+        radio_20.append([L_M,L,M,dist,TDUST,TBOL,NH_2, region['rat_radio_20']*100])
 
-    xlabels = [r'log L/M [L$_\odot$/M$_\odot$]', r'log L [L$_\odot$]', r'log M [M$_\odot$]', 'log distance [pc]', r'log T$_{\text{bol}}$ [K]', r'log N(H$_2$) [cm$^{-2}$]']
 
-    for idx, plot in enumerate(['L_M','L','M','dist','T','NH_2']):
+    xlabels = [r'log $\left(L/M\; [L_\odot/M_\odot]\right)$', r'log $\left(L\;[L_\odot]\right)$', r'log$\left(M\;[M_\odot]\right)$', 'distance [kpc]',r'$T_{\text{dust}}$ [K]', r'$T_{\text{bol}}$ [K]', r'log (N(H$_2$)\:[cm$^{-2}$])']
+
+
+    for idx, plot in enumerate(['L_M','L','M','dist','Tdust','Tbol','NH_2']):
 
         fig, axs = plt.subplots(2,1,figsize=(5,4),tight_layout=True,sharex=True)
 
@@ -319,18 +295,17 @@ def YSO_plots_compare(spitzer_sources,alma_regions,spitzer_sources_alma,cat):
             x2, y2 = np.array(data_2[0]), np.array(data_2[1])
             x3, y3 = np.array(data_3[0]), np.array(data_3[1])
             x4, y4 = np.array(data_4[0]), np.array(data_4[1])
+
+            min, max = limits[idx][0],limits[idx][1]
+            #min, max = np.min([np.min(x1),np.min(x2),np.min(x3),np.min(x4)]), np.max([np.max(x1),np.max(x2),np.max(x3),np.max(x4)])
+            n_bins = 12
+            step = (max-min)/(n_bins)
+            bins = np.arange(min, max+step, step)
             
 
-            if idx2 == 0:
-                min = round(10*np.min([np.min(x1),np.min(x2),np.min(x3),np.min(x4)]))/10
-                max = round(10*np.max([np.max(x1),np.max(x2),np.max(x3),np.max(x4)]))/10
-                n_bins = 12
-                step = (max-min)/(n_bins)
-                bins = np.arange(min, max+step, step)
-
             
 
-            groups1, groups2, groups3,groups4 = [], [], [], []
+            groups1, groups2, groups3, groups4 = [], [], [], []
             pos1, pos2, pos3, pos4 = [], [], [], []
 
             #offset = step/50  # spacing between boxplots
@@ -361,7 +336,7 @@ def YSO_plots_compare(spitzer_sources,alma_regions,spitzer_sources_alma,cat):
 
 
             # Class I
-
+            axs[idx2].scatter(x1,y1,color='blue',s=10,alpha=0.6,zorder=20)
             bp1 = axs[idx2].boxplot(
                 groups1,
                 positions=pos1,
@@ -370,7 +345,7 @@ def YSO_plots_compare(spitzer_sources,alma_regions,spitzer_sources_alma,cat):
                 showfliers=False,
                 zorder=2
             )
-            axs[idx2].scatter(x1,y1,color='blue',s=10,alpha=0.6,zorder=20)
+            
             for box in bp1['boxes']:
                 box.set(facecolor='blue', alpha=0.5, edgecolor='black',linewidth=2,zorder=0)
 
@@ -402,7 +377,7 @@ def YSO_plots_compare(spitzer_sources,alma_regions,spitzer_sources_alma,cat):
         
         for box in bp0['boxes']:
             box.set(facecolor='limegreen', alpha=0.5,edgecolor='black')
-        axs[1].scatter(x3,y3,color='darkgreen',s=10,alpha=0.3,zorder=20)
+        axs[1].scatter(x3,y3,color='darkgreen',s=10,alpha=0.6,zorder=20)
 
         bp3 = axs[1].boxplot(
             groups4,
@@ -430,8 +405,8 @@ def YSO_plots_compare(spitzer_sources,alma_regions,spitzer_sources_alma,cat):
         axs[1].set_xticks(ticks, [f"{t:.2f}" for t in ticks])
         if idx2 == 1:
             fig.savefig('../output/figures/'+cat+'/results_'+plot+'.pdf',format='pdf',dpi=300)
-            plt.show()
             plt.close()
+
 
 
 #MARK: region_plot
@@ -486,6 +461,8 @@ def region_plot(spitzer_sources,alma_sources,alma_sources_alma,cat,region,region
 
     alma_proceeding = True
 
+    markersize = 70
+
     if alma_proceeding: 
 
         counter = {}
@@ -506,33 +483,33 @@ def region_plot(spitzer_sources,alma_sources,alma_sources_alma,cat,region,region
                 if idx2 == 0:
                     for source in table:
                         if source['p1_class_I'] == 'True':
-                            axs[i].scatter(source['l']*u.deg-center[0],source['b']*u.deg-center[1],color='blue',marker='x',s=50,zorder=4)
+                            axs[i].scatter(source['l']*u.deg-center[0],source['b']*u.deg-center[1],color='blue',marker='x',s=markersize,zorder=4)
                             counter[0] = counter[0] +1
                             class_I.append(((source['l']*u.deg-center[0]).value,(source['b']*u.deg-center[1]).value))
                         elif source['p1_class_II'] == 'True':
-                            axs[i].scatter(source['l']*u.deg-center[0],source['b']*u.deg-center[1],color='red',marker='x',s=50,zorder=3)
+                            axs[i].scatter(source['l']*u.deg-center[0],source['b']*u.deg-center[1],color='red',marker='x',s=markersize,zorder=3)
                             counter[1] = counter[1] +1
                             class_II.append(((source['l']*u.deg-center[0]).value,(source['b']*u.deg-center[1]).value))
                         else:
-                            axs[i].scatter(source['l']*u.deg-center[0],source['b']*u.deg-center[1],color='lightgrey',marker='x',s=50,zorder=2)
+                            axs[i].scatter(source['l']*u.deg-center[0],source['b']*u.deg-center[1],color='lightgrey',marker='x',s=markersize,zorder=2)
                             counter[2] = counter[2] +1 
                 elif idx2 == 1:
                     for source in table:
                         if (source['HAS_SPITZER'] =='False') and (source['RADIO_MATCH'] == 0):
-                            axs[i].scatter(table['GLON']*u.deg-center[0],table['GLAT']*u.deg-center[1],color='limegreen',marker='+',s=50,zorder=2)
+                            axs[i].scatter(table['GLON']*u.deg-center[0],table['GLAT']*u.deg-center[1],color='limegreen',marker='+',s=markersize,zorder=2)
                             counter[6] = counter[6] +1
                         elif (source['HAS_SPITZER'] == 'False') and (source['RADIO_MATCH'] == 1):
-                            axs[i].scatter(table['GLON']*u.deg-center[0],table['GLAT']*u.deg-center[1],color='gold',marker='+',s=50,zorder=3)
+                            axs[i].scatter(table['GLON']*u.deg-center[0],table['GLAT']*u.deg-center[1],color='gold',marker='+',s=markersize,zorder=3)
                 else:
                     for source in table:
                         if ((source['p1_class_I'] == 'True') or (source['p2_class_I'] == 'True')):
-                            axs[i].scatter(source['GLON']*u.deg-center[0],source['GLAT']*u.deg-center[1],color='blue',marker='+',s=50,zorder=6)
+                            axs[i].scatter(source['GLON']*u.deg-center[0],source['GLAT']*u.deg-center[1],color='blue',marker='+',s=markersize,zorder=6)
                             counter[3] = counter[3] +1
                         elif ((source['p1_class_II'] == 'True') or (source['p2_class_II'] == 'True')):
-                            axs[i].scatter(source['GLON']*u.deg-center[0],source['GLAT']*u.deg-center[1],color='red',marker='+',s=50,zorder=5)
+                            axs[i].scatter(source['GLON']*u.deg-center[0],source['GLAT']*u.deg-center[1],color='red',marker='+',s=markersize,zorder=5)
                             counter[4] = counter[4] +1
                         else:
-                            axs[i].scatter(source['GLON']*u.deg-center[0],source['GLAT']*u.deg-center[1],color='lightgrey',marker='+',s=50,zorder=1)
+                            axs[i].scatter(source['GLON']*u.deg-center[0],source['GLAT']*u.deg-center[1],color='lightgrey',marker='+',s=markersize,zorder=1)
                             counter[5] = counter[5] +1   
                         
         for i in range(len(counter)):
@@ -589,8 +566,8 @@ def region_plot(spitzer_sources,alma_sources,alma_sources_alma,cat,region,region
             dist_class_II = -999
         else:
             dist_class_II = dist_class_II_np 
-          
-           
+        
+        
 
 
     else:
@@ -664,7 +641,7 @@ def region_plot(spitzer_sources,alma_sources,alma_sources_alma,cat,region,region
             dist_class_II_alma = -999
         else:
             dist_class_II_alma = dist_class_II_np 
-          
+        
     else:
         dist_class_0,dist_radio  = [-999,-999]    
         dist_class_I_alma,dist_class_II_alma = [-999,-999]
