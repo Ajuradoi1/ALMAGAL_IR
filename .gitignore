@@ -183,6 +183,8 @@ src/__marimo__/
 # jupyternotebook
 src/.ipynb_checkpoints/
 
+.vscode
+
 output/
 alma_input/*.txt
 alma_input/*.tab
